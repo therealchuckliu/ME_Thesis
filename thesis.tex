@@ -111,7 +111,7 @@
 \thesistitlepage
 \copyrightpage
 \begin{abstract}
-  Recent human-in-the-loop (HIL) optimization studies using wearable devices have shown an improved average metabolic reduction by optimizing control parameters online during short-duration experiments. However, the coupling of slow metabolic dynamics, high measurement noise, and hard experimental time constraints creates significant practical challenges for scaling optimization methods to more expressive control strategies. Prior work on applying gradient descent and Bayesian optimization methods to perform HIL optimization have decoupled the estimation and parameter selection problems, which leads to fixed estimation intervals and imposes a hard limit on the number of parameter evaluations possible in a given time budget. In this work, a different approach is taken that couples estimation and parameter selection, allowing the algorithm to spend less time refining the metabolic estimates for parameters that are unlikely to improve performance over the best values observed so far. We represent this early stopping mechanism with two different models that are incorporated in a standard Bayesian optimization scheme using an unscented Kalman filter for estimating metabolic rate. Performance is analyzed in several numerical examples and in pilot experiments with two human subjects optimizing 6 free control parameters of a hip soft exosuit.
+  Recent \emph{human-in-the-loop} (HIL) optimization studies using wearable devices have shown an improved average metabolic reduction by optimizing control parameters online during short-duration experiments. However, the coupling of slow metabolic dynamics, high measurement noise, and hard experimental time constraints creates significant practical challenges for scaling optimization methods to more expressive control strategies. Prior work on applying gradient descent and Bayesian optimization methods to perform HIL optimization have decoupled the estimation and parameter selection problems, which leads to fixed estimation intervals and imposes a hard limit on the number of parameter evaluations possible in a given time budget. In this work, a different approach is taken that couples estimation and parameter selection, allowing the algorithm to spend less time refining the metabolic estimates for parameters that are unlikely to improve performance over the best values observed so far. We represent this early stopping mechanism with two different models that are incorporated in a standard Bayesian optimization scheme using an unscented Kalman filter for estimating metabolic rate. Performance is analyzed in several numerical examples and in pilot experiments with two human subjects optimizing 6 free control parameters of a hip soft exosuit.
 \end{abstract}
 
 % Center headings for table of contents, LOT, and LOF and make them smaller so
@@ -120,23 +120,18 @@
 \renewcommand{\contentsname}{\protect\centering\protect\Large Contents}
 \renewcommand{\listtablename}{\protect\centering\protect\Large List of Tables}
 \renewcommand{\listfigurename}{\protect\centering\protect\Large List of Figures}
+\renewcommand{\listalgorithmname}{\protect\centering\protect\Large List of Algorithms}
 
 \tableofcontents % Table of contents
 
 % The rest of the front matter: Lists of tables, figures, dedication and
 % acknowledment is optional. Comment out whatever you don't like
-%\listoftables
-%\listoffigures
+\listoftables
+\listoffigures
+\listofalgorithms
 \begin{acknowledgments}
-  I would first like to thank my thesis advisor Scott Kuindersma. It has been a privilege to be his student and I appreciate his guidance, patience, and immense knowledge in helping me throughout the course of my study.
-
-  I would also like to thank Myunghee Kim, who was integral to the work in this thesis. As the central point of contact in the multi-joint study, her coordination of the various components of development was instrumental.
-
-  Lastly, I'd like to thank Professor Conor Walsh, his lab and the Wyss staff, in particular Nikos Karavas, Sangjun Lee, Jinsoo Kim, Chih-Kang Chang, Asa Eckert-Erdheim, Maria Athanassiu, Brice Mikala Iwangou, Nicolas Menard, and Sarah Sullivan.
+  I am very grateful to Scott Kuindersma for being an incredible advisor. It has been a privilege to be his student and I appreciate his guidance, patience, and immense knowledge in helping me throughout the course of my study. It has also been a pleasure to work with Myunghee Kim, who was integral to the work in this thesis. Her wealth of experience in the field as well as overseeing the various levels of development was instrumental. I'd also like to thank Professor Conor Walsh, his lab and the Wyss staff, in particular Nikos Karavas, Sangjun Lee, Jinsoo Kim, Chih-Kang Chang, Asa Eckert-Erdheim, Maria Athanassiu, Brice Mikala Iwangou, Nicolas Menard, and Sarah Sullivan. This work would not have been possible without the hard work of everyone involved from the design and fabrication of the exosuit to the development of the controllers. Finally, I thank my parents, my friends, and the rest of my family for their amazing support.
 \end{acknowledgments}
-\begin{dedication}
-  To my parents
-\end{dedication}
 
 
 %%%%%%%%%%%%%%%% MAIN BODY %%%%%%%%%%%%%%%%

@@ -1,5 +1,5 @@
 \section{Experimental Protocol}
-\subsection{Optimization Parameters}
+\subsection*{Optimization Parameters}
 An initial pilot was run varying 6 parameters
 \begin{table}[h]
   \centering
@@ -13,13 +13,13 @@ An initial pilot was run varying 6 parameters
   \end{tabular}
 \end{table}
 
-\subsection{Hip-only Soft Exosuit}
+\subsection*{Hip-only Soft Exosuit}
 The textile components of the hip-only soft exosuit consist of a short spandex base layer, a waist belt, and two thigh braces as described in \citep{Lee2018}. Two IMUs (MTi-3 AHRS, Xsens Technologies B.V., Enschede, Netherlands) mounted on the anterior part of the thigh measure the orientation and angular velocity of thigh segments which are used for gait cycle estimation in real-time \citep{Ding2016}. The anchoring points of the Bowden cable are at the bottom left and right of the waist belt as well as at the middle center of the thigh braces from the posterior view. Two load cells (LSB200, Futek Advanced Sensor Technology Inc., CA, USA) are integrated in the aluminum attachment piece of the anchoring point to measure the cable force. When the actuator pulls the inner cable, the soft exosuit generates a hip extension torque by shortening the distance between two anchoring points. 
 
-\subsection{Actuation System}
+\subsection*{Actuation System}
 The two DOF actuators in the off-board system are used to deliver hip extension assistance to both legs. Each actuator consists of a customized brushless motor (Allied Motion, Colorado, USA), a 9.25:1 spiroid gear set (ITW Heartland, MN, USA) and a 45 mm radius pulley. The pulley groove is designed to be able to wrap the inner Bowden cable 1.5 times around the pulley, allowing 420 mm of cable travel \citep{Lee2018}. A 360 counts/rev incremental encoder (AS5134-ZSST, ams AG, Premstaetten, Austria) is mounted on the customized motor to measure its position and velocity. The Bowden cable sheath of the actuator side connects to the pulley cover and inner cable attaches to the pulley. When the motor rotates, the actuator can either pull in the inner cable to generate a force or push the cable out so it can go slack.
 
-\subsection{Control System Architecture}
+\subsection*{Control System Architecture}
 The electronics hardware has a three-layer configuration for the control system architecture: real-time target machine (top layer), microprocessor (middle layer), and servomotor driver (bottom layer). In the top layer, the Speedgoat real-time target machine runs a Simulink model in a host laptop. A PCI interface card (CAN-AC PCI, Softing AG, Haar, Germany) for CAN communication is installed on the target machine to acquire sensor signals and send the command to the servomotor driver through the microprocessor. The microprocessor (Due, Arudino, Ivrea, Italy) in the middle layer acts as a signal hub between target machine and servomotor driver while protecting the system from undesired behavior of the actuator due to anomalous errors from the target machine. In the bottom layer, Gold Twitter (Elmo Motion Control Ltd, Israel) with 55V maximum supply voltage and 60 A peak current is selected as the current servomotor driver. It tracks the current command from the microprocessor to drive the actuator. The CAN communication between layers closes the control loop at 1kHz loop rate \citep{Lee2018}.
 
 Another laptop collects the metabolic data, runs an optimization algorithm, and sends the assistance profile parameters that will be explored in the next condition to the host laptop. Ethernet communication is used between a real-time target machine, a host laptop, and the second laptop. Based on the profile parameters calculated by the algorithm, the host laptop sends the current command to the servomotor drive to deliver assistance to the subject.

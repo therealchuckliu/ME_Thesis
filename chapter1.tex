@@ -1,26 +1,26 @@
 \section{Gaussian Processes}
 \label{gp}
 
-Given an exosuit parameterization space $\mathbb{X} \subset \mathbb{R}^m$ and an unknown, noisy energetic cost function $f$ that is expensive to evaluate, we aim to find the solution to the minimization problem
+Given a parameter space $\mathbb{X} \subset \mathbb{R}^m$ and an unknown, noisy energetic cost function $f$ that is expensive to evaluate, we aim to find the solution to the minimization problem
 \begin{align}
   x^* = \argmin_{x \in \mathbb{X}} f(x),
 \end{align}
-by iteratively choosing points to evaluate until a finite time constraint is met. Bayesian Optimization, our sequential design strategy, computes a posterior distribution on possible objective functions given all previous evaluations and optimizes an acquisition function on this distribution to globally select the next value of $x$ to evaluate, typically in a way that carefully balances exploration and exploitation. The distribution over $f$ is modeled as a Gaussian process \citep{Rasmussen2006}, $\mathbb{G}$, 
+by iteratively choosing points to evaluate until a finite time constraint is met. Bayesian optimization, our sequential design strategy, computes a posterior distribution on possible objective functions given all previous evaluations and optimizes an acquisition function on this distribution to globally select the next value of $x$ to evaluate, typically in a way that carefully balances exploration and exploitation. The distribution over $f$ is modeled as a Gaussian process \citep{Rasmussen2006} $\mathbb{G}$, 
 \begin{align}
   f \sim \mathbb{G}(\mu, \kappa), 
 \end{align}
-where $\mu : \mathbb{X} \rightarrow \mathbb{R}$ is a mean function typically set to zero, and $\kappa : \mathbb{X}\times \mathbb{X} \rightarrow \mathbb{R}$ is a covariance kernel that characterizes the correlation between different points in the domain. The most common example is the squared exponential kernel
+where $\mu : \mathbb{X} \rightarrow \mathbb{R}$ is a mean function typically set to zero, and $\kappa : \mathbb{X}\times \mathbb{X} \rightarrow \mathbb{R}$ is a covariance kernel that characterizes the correlation between different points in the domain. The most common example for the covariance kernel is the squared exponential
 \begin{align}
-  \kappa(x_i, x_j \vert \theta) = \sigma_\theta^2 \exp(-\frac{1}{2}d^2(\frac{x_i}{l}, \frac{x_j}{l}))
+  \kappa(x_i, x_j \vert \theta) = \sigma_\theta^2 \exp(-\frac{1}{2}d^2(\frac{x_i}{l}, \frac{x_j}{l})),
 \end{align}
-with parameters $\theta = [\sigma_\theta^2, l]$ where $l$ is either a scalar or vector of dimension $m$. The Matérn kernel is a more generalized form of the squared exponential, defined as
+with parameters $\theta = [\sigma_\theta^2, l]$ where $l$ is either a scalar or vector of dimension $m$. The Matérn covariance kernel is a more generalized form of the squared exponential, defined as
 \begin{align}
 	\kappa(x_i, x_j \vert \theta) = \sigma_\theta^2\frac{2^{1-\nu}}{\Gamma(\nu)}(\sqrt{2\nu} d(\frac{x_i}{l}, \frac{x_j}{l}))^\nu K_\nu (\sqrt{2\nu} d(\frac{x_i}{l}, \frac{x_j}{l}))
 \end{align}
-with an additional parameter $\nu$ and $K_\nu$ is a modified Bessel function. 
+with $\theta= [\sigma_\theta^2, l, \nu]$ and $K_\nu$ is a modified Bessel function.
 \section{GP Regression and Acquisition Functions}
 \label{gp_acq}
-By definition of a GP, any collection of points forms a multivariate normal distribution defined by $\mu$ and $\kappa$. More formally, given some training samples $\mathbb{S} = \{(x_i, y_i)\}_{i=1}^n$ and assuming a Gaussian noise model $y_i \sim f(x_i) + \mathcal{N}(0, \sigma_n^2)$, the posterior distribution at $x$ is a normal with mean $\bar{\mu}(x)$ and variance $\bar{\sigma}^2(x)$ evaluated as
+By definition of a GP, any collection of points forms a multivariate normal distribution defined by $\mu$ and $\kappa$. Under this assumption, a posterior distribution given a set of training samples can be solved analytically. Formally, given some training samples $\mathbb{S} = \{(x_i, y_i)\}_{i=1}^n$, and assuming each sample follows a Gaussian noise model $y_i \sim f(x_i) + \mathcal{N}(0, \sigma_n^2)$, the posterior distribution at $x$ is Gaussian with mean $\bar{\mu}(x)$ and variance $\bar{\sigma}^2(x)$ evaluated as
 \begin{gather}
   \bar{\mu}(x) = K(X, x)^T[K(X, X) + \sigma_n^2 I]^{-1}Y \\
   \bar{\sigma}^2(x) = \kappa(x, x\vert \theta) - K(X, x)^T[K(X,X) + \sigma_n^2 I]^{-1}K(X,x) \\
@@ -37,10 +37,15 @@ where $X = \{x_i\}_{i=1}^n$ and $Y = \{y_i\}_{i=1}^n$.
 
 Given a distribution at point $x$, an acquisition function captures how attractive that point is to sample next. A common choice of acquisition function is Expected Improvement (EI), which returns the expected reduction in cost over the best parameters observed so far. For the given GP model, EI can be computed in closed form: 
 \begin{align}
-  EI(x\vert \mathbb{S}) &= z\bar{\sigma}(x)\Phi(z) + \bar{\sigma}(x)\phi(z) \\
-  z &= \frac{\min(Y) - \bar{\mu}(x) + \xi}{\bar{\sigma}(x)}\nonumber,
+  \begin{split}
+  EI(x\vert \mathbb{S}) &= \int_\infty^\infty max(0, y^*-y)p(y\vert x)dy\\
+    &= z\bar{\sigma}(x)\Phi(z) + \bar{\sigma}(x)\phi(z)
+  \end{split}\\
+  z &= \frac{y^* - \bar{\mu}(x) + \xi}{\bar{\sigma}(x)}\nonumber,
 \end{align}
-where $\xi$ is a scaling parameter to adjust the tradeoff between exploration-exploitation \citep{Lizotte:2008:PBO:1626686}. Using EI, the next point is chosen as $x^* = \argmax_{x} EI(x \vert \mathbb{S})$. Figure \ref{fig:ei} shows a few iterations of Bayesian Optimization on a sample function.
+where $y^*$ is the best value observed so far and $\xi$ is a scaling parameter to adjust the tradeoff between exploration-exploitation \citep{Lizotte:2008:PBO:1626686}. The next point to evaluate is then chosen as $x^* = \argmax_{x} EI(x \vert \mathbb{S})$. Figure \ref{fig:ei} shows a few iterations of Bayesian Optimization on a sample function.
+
+The choice of $y^*$ can be defined as the minimum observed value so far, the minimum $\bar{\mu}(x)$ under the current GP model over all previous observations, or some biased version thereof \citep{Lizotte:2008:PBO:1626686}. 
 
 \section{Hyperparameter Optimization and Student-t Noise Model}
 \label{gp_hyperparam}
@@ -65,8 +70,8 @@ The values of the hyperparameters in the kernel function are critical to determi
   \State $\mathbb{S} = \mathbb{S} \cup \{e_i, F(e_i)\}$
 \End
 \While{t < T}
-  \State Update GP Hyperparameters $\theta, \sigma_n^2$
-  \State Given $f(x\vert \theta, \sigma_n^2, \mathbb{S}) \sim \mathcal{N}(\mu_x, \sigma_x^2)$,
+  \State Update GP Hyperparameters $\theta$
+  \State Given $f(x\vert \theta, \mathbb{S}) \sim \mathcal{N}(\mu_x, \sigma_x^2)$,
   \State $x^* = \argmax_{x \in \mathbb{X}} g(\mu_x, \sigma_x^2)$
   \State $\mathbb{S} = \mathbb{S} \cup \{x^*, f(x^*)\}$
 \End
@@ -74,21 +79,21 @@ The values of the hyperparameters in the kernel function are critical to determi
 \end{algorithm}
 
 
-Instead of using a single point estimate, a full Bayesian approach would involve marginalizing out the hyperparameters through an MCMC approximation. This would be particularly beneficial in the case that the posterior is multi-modal or sensitive to small changes in parameter values. Many sampling approaches have been proposed, and we refer the reader to \cite[Chapter~14]{barber2011bayesian} for a summary. 
+Instead of using a single point estimate, a full Bayesian approach would involve marginalizing out the hyperparameters through an MCMC approximation. This would be particularly beneficial in the case that the posterior is multi-modal or sensitive to small changes in hyperparameter values. Many sampling approaches have been proposed, and we refer the reader to \cite[Chapter~14]{barber2011bayesian} for a summary. 
 
-The MCMC approach is also used in more complex noise models whose posterior distribution and marginal likelihood are no longer analytically tractable. \citet{NIPS2009_3806,Jylanki:2011:RGP:1953048.2078209} developed a more robust noise model based on the Student-t distribution to handle occurrences of large outliers in the collected data. The noise model follows
+The MCMC approach is also used in more complex noise models whose posterior distribution and marginal likelihood are no longer analytically tractable. \citet{NIPS2009_3806,Jylanki:2011:RGP:1953048.2078209} developed a more robust, heteroscedastic noise model based on the Student-t distribution to handle occurrences of large outliers in the collected data. The noise distribution follows
 
 \begin{align}
-p(y\vert f,\sigma_n^2,\nu) = \frac{\Gamma (\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\nu\pi}\sigma_n})(1 + \frac{(y-f)^2}{\nu\sigma_n^2})^{\frac{-(\nu + 1)}{2}}
+p(y_i\vert f,\sigma_i^2,\nu) = \frac{\Gamma (\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\nu\pi}\sigma_i})(1 + \frac{(y-f)^2}{\nu\sigma_i^2})^{\frac{-(\nu + 1)}{2}}
 \end{align} 
-where $\nu$ is the degrees of freedom. A Gibbs sampler can be performed through a hierarchical model
+where $\nu$ is a degrees of freedom hyperparameter. A Gibbs sampler can be performed through a hierarchical model
 \begin{align}
 \begin{split}
-y\vert f &\sim \mathcal{N}(f, V)\\
-V &\sim \text{Inv-}\chi^2(\nu, \sigma_n^2),
+y_i\vert f &\sim \mathcal{N}(f, V)\\
+V &\sim \text{Inv-}\chi^2(\nu, \sigma_i^2),
 \end{split}
 \end{align}
-with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref{fig:mcmcvsmap} shows a comparison of the robust Student-t noise with the standard Gaussian noise.
+with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref{fig:mcmcvsmap} shows a comparison of the robust Student-t noise with the standard Gaussian noise. The majority of the data points exhibit low variances, while some extreme outliers are also produced. While the Gaussian noise model treats each data point equally, the Student-t model is able to reach a noise distribution that effectively matches the underlying function.
 
 \begin{figure}[t]
 \centering
@@ -96,3 +101,8 @@ with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref
 \caption{Gaussian MAP estimate vs. Student-t Gibbs Sampler. Data points added with Gaussian noise including some outliers with very high variance.}
 \label{fig:mcmcvsmap}
 \end{figure}
+
+\section{Implementation}
+There are a number of implementation choices relevant to HIL optimization. While the MCMC approach has shown to be more robust, GP regression scales linearly with the number of samples. As such, an accurate optimization of the acquisition function can take on the order of minutes. However, once a stopping condition is met the next parameter setting must immediately be communicated to the wearable device. In our implementation, we start a sampler as soon as a new parameter evaluation starts. When the stopping condition is met, if the MCMC has completed optimizing EI we use the returned parameter setting to sample next. Otherwise, we default to the MAP estimate. There is then a tradeoff of the standard MAP estimate with a more robust MCMC sampler that uses one less training sample.
+
+As Chapter \ref{ch:2} will discuss, the returned metabolic estimates have an associated variance; earlier stopping points exhibit a higher variance representing greater uncertainty for the estimated cost. As a result, the GP mean may incorrectly inflate the best observed value if a number of parameter settings nearby are stopped early (see MAP estimate in Figure \ref{fig:mcmcvsmap} for $x\in(-2, -1)$). For this reason in the Expected Improvement function we treat $y^*$ as the best observed value so far, not the regression mean. We also fix the noise hyperparameters in the MCMC method proportional to the estimator variances, effectively giving more weight to the observations measured the full duration. Figure \ref{fig:fixednoise} gives an example of the effect of fixed noise hyperparameters on the GP.
