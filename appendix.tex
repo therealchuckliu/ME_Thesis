@@ -1,11 +1,6 @@
 \begin{appendices}
 
 \chapter{Bayesian Optimization}
-\begin{figure}[h]
-\includegraphics[width=\textwidth]{fixednoisestudent.png}
-\caption{Demonstration of the effect of fixing measurement noise for each data point. Using the same data from Figure \ref{fig:mcmcvsmap}, the top graph shows the same MCMC graph that infers the noise hyperparameters with the highest likelihood. In the bottom graph, the noise parameters are fixed and inversely proportional to the true accuracy - in effect telling the GP that the outliers are the correct values. This may arise in situations where a minimum is found (measured for the full duration, resulting variance is relatively low) and many nearby points are subsequently sampled and stopped early (resulting variances are very high).}
-\label{fig:fixednoise}
-\end{figure}
 
 \begin{sidewaysfigure}[h]
 \begin{subfigure}{\textwidth}

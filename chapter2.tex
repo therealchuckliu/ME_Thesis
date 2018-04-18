@@ -81,7 +81,7 @@ The volatility of the estimator is dependent on the calibration of the covarianc
 \section{Testing and Future Improvements}
 Using previously attained metabolic data, Figure \ref{fig:ukftuned} shows the raw and noisy measurements taken and the metabolic cost prediction that the model developed in response to a representative participant\footnote{Testing carried out by Myunghee Kim}. The bottom plot displays the covariance associated with the cost, beginning with a covariance of 1 and converging at different rates depending upon the raw data. When tuned properly, both trials see a relatively smooth rate of convergence of the estimate. With varying amounts of data provided, the accuracy in percent error was calculated by comparing with a "ground truth" value at each termination condition (5 min, 2 min, 1.5 min, 20 breaths, and 30 breaths). This ground truth value is the average of the last two minutes of data, when the subject has reached steady-state.
 
-During trial testing for our optimization methods, the UKF estimator showed various levels of volatility across subjects (Figure \ref{fig:subjcostest}). Future work on the estimator would involve creating a cost function to optimize across the various covariance parameters, as these values should also be subject-specific. The cost function should balance between the smoothness of the estimation curve and eventual convergence to the "true cost". As Bayesian optimization starts with an exploration phase that will measure a specified number of points for the maximum duration, the estimator can then be tuned real-time a posteriori. Without this tuning, the next chapter will go into modeling the stopping problem while taking into account the accuracy of the estimator. 
+During trial testing for our optimization methods, the UKF estimator showed various levels of volatility across subjects (Figure \ref{fig:subjcostest}). Future work on the estimator would involve creating a cost function to optimize across the various covariance parameters, as these values should also be subject-specific. The cost function should balance between the smoothness of the estimation curve and eventual convergence to the "true" instantaneous energetic cost. As Bayesian optimization starts with an exploration phase that will measure a specified number of points for the maximum duration, the estimator can then be tuned real-time a posteriori. Without this tuning, Chapter \ref{ch:3} will go into modeling the stopping problem while taking into account the accuracy of the estimator. 
 
 \begin{figure}[t]
 \centering
@@ -106,6 +106,6 @@ During trial testing for our optimization methods, the UKF estimator showed vari
 \begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{subjcostest.png}
-\caption{Tuned UKF Estimator shows different levels of noise during optimization studies on different subjects.}
+\caption{Tuned UKF Estimator shows different levels of volatility during optimization studies on different subjects.}
 \label{fig:subjcostest}
 \end{figure}

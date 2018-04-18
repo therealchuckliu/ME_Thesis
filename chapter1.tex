@@ -79,12 +79,12 @@ The values of the hyperparameters in the kernel function are critical to determi
 \end{algorithm}
 
 
-Instead of using a single point estimate, a full Bayesian approach would involve marginalizing out the hyperparameters through an MCMC approximation. This would be particularly beneficial in the case that the posterior is multi-modal or sensitive to small changes in hyperparameter values. Many sampling approaches have been proposed, and we refer the reader to \cite[Chapter~14]{barber2011bayesian} for a summary. 
+Instead of using a single point estimate, a full Bayesian approach would involve marginalizing out the hyperparameters through an MCMC approximation. This would be particularly beneficial in the case where the posterior is multi-modal or sensitive to small changes in hyperparameter values. Many sampling approaches have been proposed, and we refer the reader to \cite[Chapter~14]{barber2011bayesian} for a summary. 
 
-The MCMC approach is also used in more complex noise models whose posterior distribution and marginal likelihood are no longer analytically tractable. \citet{NIPS2009_3806,Jylanki:2011:RGP:1953048.2078209} developed a more robust, heteroscedastic noise model based on the Student-t distribution to handle occurrences of large outliers in the collected data. The noise distribution follows
+The MCMC approach is also used in more complex noise models whose posterior distribution and marginal likelihood are no longer analytically tractable. \citet{NIPS2009_3806,Jylanki:2011:RGP:1953048.2078209} developed a model more robust noise model based on the Student-t distribution to handle occurrences of large outliers in the collected data. The noise distribution follows
 
 \begin{align}
-p(y_i\vert f,\sigma_i^2,\nu) = \frac{\Gamma (\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\nu\pi}\sigma_i})(1 + \frac{(y-f)^2}{\nu\sigma_i^2})^{\frac{-(\nu + 1)}{2}}
+p(y\vert f,\sigma_n^2,\nu) = \frac{\Gamma (\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\nu\pi}\sigma_n})(1 + \frac{(y-f)^2}{\nu\sigma_n^2})^{\frac{-(\nu + 1)}{2}}
 \end{align} 
 where $\nu$ is a degrees of freedom hyperparameter. A Gibbs sampler can be performed through a hierarchical model
 \begin{align}
@@ -105,4 +105,17 @@ with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref
 \section{Implementation}
 There are a number of implementation choices relevant to HIL optimization. While the MCMC approach has shown to be more robust, GP regression scales linearly with the number of samples. As such, an accurate optimization of the acquisition function can take on the order of minutes. However, once a stopping condition is met the next parameter setting must immediately be communicated to the wearable device. In our implementation, we start a sampler as soon as a new parameter evaluation starts. When the stopping condition is met, if the MCMC has completed optimizing EI we use the returned parameter setting to sample next. Otherwise, we default to the MAP estimate. There is then a tradeoff of the standard MAP estimate with a more robust MCMC sampler that uses one less training sample.
 
-As Chapter \ref{ch:2} will discuss, the returned metabolic estimates have an associated variance; earlier stopping points exhibit a higher variance representing greater uncertainty for the estimated cost. As a result, the GP mean may incorrectly inflate the best observed value if a number of parameter settings nearby are stopped early (see MAP estimate in Figure \ref{fig:mcmcvsmap} for $x\in(-2, -1)$). For this reason in the Expected Improvement function we treat $y^*$ as the best observed value so far, not the regression mean. We also fix the noise hyperparameters in the MCMC method proportional to the estimator variances, effectively giving more weight to the observations measured the full duration. Figure \ref{fig:fixednoise} gives an example of the effect of fixed noise hyperparameters on the GP.
+As Chapter \ref{ch:2} will discuss, the returned metabolic estimates have an associated variance; earlier stopping points exhibit a higher variance representing greater uncertainty for the estimated cost. As a result, the GP mean may incorrectly inflate the best observed value if a number of parameter settings nearby are stopped early (see MAP estimate in Figure \ref{fig:mcmcvsmap} for $x\in(-2, -1)$). For this reason in the Expected Improvement function we treat $y^*$ as the best observed value so far, not the regression mean. We also fix the noise hyperparameters to be proportional to the estimator variances, effectively giving more weight to the observations measured the full duration. In the Gaussian noise model, the regression equation then becomes
+\begin{align}
+\begin{split}
+  \bar{\mu}(x) &= K(X, x)^T[K(X, X) + \Sigma]^{-1}Y \\
+  \bar{\sigma}^2(x) &= \kappa(x, x\vert \theta) - K(X, x)^T[K(X,X) + \Sigma]^{-1}K(X,x),
+\end{split}
+\end{align}
+where $\Sigma$ is a diagonal matrix of entries $\{\sigma_i^2\}$ corresponding to the variance of each data point \citep{Kersting:2007:MLH:1273496.1273546}. In the case of the MCMC model, each $y_i$ is defined independently with a noise parameter already. Figure \ref{fig:fixednoise} gives an example of the effect of fixed noise hyperparameters on the GP.
+
+\begin{figure}[t]
+\includegraphics[width=\textwidth]{fixednoise.png}
+\caption{Demonstration of the effect of fixing measurement noise. Using the same data from Figure \ref{fig:mcmcvsmap}, the noise associated with each data point is fixed and inversely proportional to the true accuracy - in effect telling the GP that the minority outliers are the more accurate values. This may arise in our stopping problem where a minimum is found (measured for the full duration, resulting variance is relatively low) and many nearby points are subsequently sampled and stopped early (resulting variances are very high).}
+\label{fig:fixednoise}
+\end{figure}

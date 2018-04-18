@@ -105,7 +105,7 @@ The stopping condition for the one-armed bandit problem is equivalent to a two-a
 Having a constant risk threshold in either the $\sigma$-offset or Gittins model may be difficult to tune across subjects. Another approach is to use the exploration phase of Bayesian optimization to create a schedule for the thresholds adapted to the subject's measurements. Let $M$ and $\Sigma$ be $\vert \mathbb{E}\vert \times N$ matrices providing traces where $M_{ij}, \Sigma_{ij}$ correspond to $\mu_{x_j}, \sigma^2_{x_j}$ for exploration point $i$ and measurement $j$. For each exploration point, the $\hat{x}^*$ distribution can be the final distribution at measurement $N$ so as to have a sense of the magnitude of thresholds for comparing similar cost estimates. Algorithm $\ref{alg:adapthresh}$ details the calculation of a threshold vector $A$.
 
 \begin{algorithm}[t]
-\caption{Determining threshold levels for either model based on subject's exploration data. With the $\sigma$-offset, a higher threshold is more risk averse, while with the Gittins model a lower is.}
+\caption{Determining threshold levels for either model based on subject's exploration data. With the $\sigma$-offset, the higher threshold is more risk averse, while with the Gittins model the lower is.}
 \label{alg:adapthresh}
 \begin{algorithmic}
 \State \textkeyword{Define $\vert\mathbb{E}\vert \times N$ Matrix } $X$
