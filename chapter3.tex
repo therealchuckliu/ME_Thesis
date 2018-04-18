@@ -3,14 +3,24 @@ With an estimate and associated variance for the instantaneous energetic cost, t
 
 \begin{table}[h]
 \centering
-\begin{tabular}{ c  c }
-  $N$ & Finite horizon\\\\
-  $X_t$ & State at time $t$\\\\
-  $P(X_t \vert X_{t-1})$ & State transitions, typically Markovian\\\\
-  $\lambda$ & Discount Factor $\in (0, 1]$\\\\
-  $r(X)$ & Bounded reward function for continuing at state $X$\\\\
-  $g(X)$ & Bounded reward function for stopping at state $X$
+\begin{tabular}{ |c  c| }
+  \hline&\\
+  $N$ & Finite horizon\\
+  &\\
+  $X_t$ & State at time $t$\\
+  &\\
+  $P(X_t \vert X_{t-1})$ & State transitions, typically Markovian\\
+  &\\
+  $\lambda$ & Discount Factor $\in (0, 1]$\\
+  &\\
+  $r(X)$ & Bounded reward function for continuing at state $X$\\
+  &\\
+  $g(X)$ & Bounded reward function for stopping at state $X$\\
+  &\\
+  \hline
 \end{tabular}
+\caption{Setup of finite horizon stopping problem}
+\label{tab:stopping}
 \end{table}
 
 The objective is to find $\tau$ that maximizes
@@ -18,7 +28,7 @@ The objective is to find $\tau$ that maximizes
   V(x) = \max_{\tau: \tau \leq N} \mathbb{E}[\lambda^{\tau} g(X_{\tau}) + \sum_{i=0}^{\tau-1} \lambda^{i}r(X_j) \vert X_0 = x]
 \end{align}
 
-By defining the Dynamic Programming Equations
+The value function can be computed via backward induction by defining
 \begin{align}
 \begin{split}
   J_N(x) &= g(x)\\
@@ -29,7 +39,7 @@ $V(x) = J_0(x)$ and the optimal stopping time is
 \begin{align}
   \tau = \min_{t \geq 0}J_t(X_t) = g(X_t)
 \end{align}
-For a derivation of the optimal stopping time, see Appendix \ref{thm:ost}. The rest of this chapter covers how to formulate the stopping problem within an iteration of Bayesian Optimization using the metabolic cost estimator. Let $N$ be the maximum number of measurements allowed at a parameter evaluation, $\hat{x}_t \sim \mathcal{N}(\mu_{x_t}, \sigma^2_{x_t})$ the cost estimate and associated variance for the current iteration, and $\hat{x}^* \sim \mathcal{N}(\mu_{x^*}, \sigma^2_{x^*})$ the cost estimate and variance for the best parameter setting found thus far. As there is an exploration phase $\hat{x}^*$ will always be defined (Algorithm \ref{alg:bayesopt}).
+For a derivation of the optimal stopping time, see Appendix \ref{thm:ost}. The rest of this chapter covers how to formulate the stopping problem within an iteration of Bayesian optimization using the metabolic cost estimator. Let $N$ be the maximum number of measurements allowed at a parameter evaluation, $\hat{x}_t \sim \mathcal{N}(\mu_{x_t}, \sigma^2_{x_t})$ the cost estimate and associated variance for the current evaluation, and $\hat{x}^* \sim \mathcal{N}(\mu_{x^*}, \sigma^2_{x^*})$ the cost estimate and variance for the best parameter setting found thus far. As there is an exploration phase $\hat{x}^*$ will always be defined (Algorithm \ref{alg:bayesopt}).
 
 \section{$\sigma$-scaled Offset}
 The $\sigma$-scaled offset model directly embeds $\hat{x}_t$ and $\hat{x}^*$ into the stopping problem. The best estimate of the difference in energetic costs is given by the following Gaussian distribution
@@ -41,7 +51,7 @@ The $\sigma$-scaled offset model directly embeds $\hat{x}_t$ and $\hat{x}^*$ int
 \end{split}
 \end{align}
 
-The state is then the estimate difference, with a non-Markovian transition model of independent draws from the same Gaussian distribution. The reward function incentivizes continuing the lower $x_t$ seems relative to $x^*$. In summary,
+The stopping problem state is then the estimate difference, with a non-Markovian transition model of independent draws from the same Gaussian distribution. The reward function incentivizes continuing the lower $x_t$ seems relative to $x^*$. In summary,
 
 \begin{align}
 \begin{split}
@@ -52,19 +62,19 @@ The state is then the estimate difference, with a non-Markovian transition model
   g(x) &= 0,
 \end{split}
 \end{align}
-where $K$ is a $\sigma$-scaled offset to provide some fault tolerance to the estimate. The optimal stopping point for this formulation can be characterized as the first time $X_t > k\sigma$. As more measurements are taken and $P_{xx}$ decreases, $\sigma^2$ decreases the threshold accordingly.
+where $K$ is a $\sigma$-scaled offset to provide some risk averseness to the estimate. The optimal stopping point for this formulation can be characterized as the first time $X_t > k\sigma$. As more measurements are taken and $P_{x}$ decreases, $\sigma^2$ decreases the offset accordingly.
 
-As shown in Section \ref{sec:ukfcovar}, underestimating $P_w$ can cause the estimator to exhibit high volatility. Additionally, since a state covariance update $P_x(t)$ is also bounded by $P_w$, a lower $P_w$ will cause $\sigma^2$ to be underestimated. With the $\sigma$-scaled offset model, underestimating the noisiness of measurements would likely stop measurements on potentially promising parameter settings early. 
+As shown in Section \ref{sec:ukfcovar}, underestimating $P_w$ can cause the estimator to exhibit high volatility. Additionally, since a subsequent state covariance update $P_x(t+1)$ is bounded by $P_w$, a lower $P_w$ will also cause $\sigma^2$ to be underestimated. With the $\sigma$-scaled offset model, underestimating the noisiness of observations could potentially cause promising parameter settings to stop measuring early as there is no fault tolerance for crossing the threshold. 
 
 \section{Gittins Index}
-A more fault-tolerant model is drawn from literature related to the multi-armed bandit problem (MAB), which represents a sequential decision making problem where at any given time a player must select from different options (or arms) that then responds with a variable reward \citep{gelman2004bayesian}. Historically this has been used in a clinical context, where a physician must select from one of several different treatment options when presented a patient and receives binary rewards of either successes or failures \citep{Villar2015}. A stopping problem has also been described as a one-armed bandit problem \citep{gelman2004bayesian}.
+A more fault-tolerant model is drawn from literature related to the multi-armed bandit problem (MAB), which represents a sequential decision making problem where at any given time a player must select from different options (or arms) that then responds with a variable reward. Historically this has been used in a clinical context, where a physician must select from one of several different treatment options when presented a patient and receives binary rewards of either successes or failures \citep{Villar2015}. A stopping problem has also been described as a one-armed bandit problem \citep{gelman2004bayesian}.
 
-Successes and failures can be based on $\mu, \sigma^2$ with the Probability of Improvement (PI) metric
+In our case, successes and failures can be based on $\mu, \sigma^2$ using the Probability of Improvement (PI) metric
 \begin{align}
-  PI(\mu, \sigma^2) = \Phi(\frac{\mu}{\sigma})
+  PI(\mu, \sigma^2) = \Phi(\frac{\mu}{\sigma}),
 \end{align}
 
-A success can then be defined as $PI(\mu, \sigma^2) > T$ for some defined risk tolerance measure $T$. $PI$ is inflated by a high $\sigma^2$ initially, and as more measurements are taken $PI$ similarly decreases. 
+where $\Phi$ is the CDF for a standard normal distribution. A success can then be defined as $PI(\mu, \sigma^2) > T$ for some defined risk tolerance measure $T$. $PI$ is inflated by a high $\sigma^2$ initially, and as more measurements are taken $PI$ similarly decreases. 
 
 The state follows a Beta distribution where parameters $\alpha,\beta$ correspond to the count of successes and failures, and transitions follow the posterior of the Beta distribution. In summary,
 
@@ -83,19 +93,19 @@ The state follows a Beta distribution where parameters $\alpha,\beta$ correspond
 \end{align}
 where $\alpha_0,\beta_0$ are smoothing priors and $\alpha_t,\beta_t$ are successes and failures up to time $t$.
 
-Gittins and Jones showed that an optimal policy could be constructed by calculating a value called the Gittins Index. Let $g(x) = K$ for some constant $K$, then the Gittins Index $\nu(x)$ is defined as
+Gittins and Jones showed that an optimal policy could be constructed by calculating a value called the Gittins Index. Let $g(x) = K$ for some constant $K$, then the Gittins Index is defined as
 \begin{align}
   \nu(x) = (1-\lambda)\min_{K} \{J_0(x) = K\}
 \end{align}
 The Gittins Index is generally used for infinite horizon stopping problems, with $g(x)=\frac{\nu(x)}{1-\lambda}$ representing an infinite geometric sum to compensate for all future rewards. By setting $\lambda=1-\frac{1}{N}$, $\forall x \; 0 \leq \nu(x) \leq 1$.
 
-The stopping condition for the one-armed bandit problem is equivalent to a two-armed bandit problem, where an imaginary second arm provides a constant reward $V$ \citep{gelman2004bayesian}. The optimal policy corresponds to playing the arm as long as it's Gittins Index is above $V$. As $T$ and $V$ are correlated, one of the parameters can be fixed (such as $T=0.5$) while the other is tuned to a preferred risk tolerance.
+The stopping condition for the one-armed bandit problem is equivalent to a two-armed bandit problem, where an imaginary second arm provides a constant reward $V$ \citep{gelman2004bayesian}. The optimal policy corresponds to playing the arm as long as it's Gittins Index is above $V$. As $T$ and $V$ are correlated, one of the parameters can be fixed (such as $T=0.5$) while the other is tuned to a preferred risk tolerance for expected success rate.
 
 \section{Adaptive Thresholds}
-Having a constant threshold in either the $\sigma$-offset or Gittins model may be difficult to tune across subjects. Another approach is to use the exploration phase of Bayesian Optimization to create a schedule for the thresholds adapted to the subject's measurements. Let $M$ and $\Sigma$ be $\vert \mathbb{E}\vert \times N$ matrices providing traces where $M_{ij}, \Sigma_{ij}$ correspond to $\mu_{x_t}, \sigma^2_{x_t}$ for exploration point $i$ and measurement $j$. For each exploration point, the $\hat{x}^*$ distribution can be the final distribution at measurement $N$ so as to have a sense of the magnitude of thresholds for comparing similar cost estimates. Algorithm $\ref{alg:adapthresh}$ details the calculation of a threshold vector $A$.
+Having a constant risk threshold in either the $\sigma$-offset or Gittins model may be difficult to tune across subjects. Another approach is to use the exploration phase of Bayesian optimization to create a schedule for the thresholds adapted to the subject's measurements. Let $M$ and $\Sigma$ be $\vert \mathbb{E}\vert \times N$ matrices providing traces where $M_{ij}, \Sigma_{ij}$ correspond to $\mu_{x_j}, \sigma^2_{x_j}$ for exploration point $i$ and measurement $j$. For each exploration point, the $\hat{x}^*$ distribution can be the final distribution at measurement $N$ so as to have a sense of the magnitude of thresholds for comparing similar cost estimates. Algorithm $\ref{alg:adapthresh}$ details the calculation of a threshold vector $A$.
 
 \begin{algorithm}[t]
-\caption{Determining threshold levels for either model based on subject's exploration data. With the $\sigma$-offset, a higher threshold is more tolerant, while with the Gittins model a lower threshold is.}
+\caption{Determining threshold levels for either model based on subject's exploration data. With the $\sigma$-offset, a higher threshold is more risk averse, while with the Gittins model a lower is.}
 \label{alg:adapthresh}
 \begin{algorithmic}
 \State \textkeyword{Define $\vert\mathbb{E}\vert \times N$ Matrix } $X$
@@ -129,13 +139,27 @@ Having a constant threshold in either the $\sigma$-offset or Gittins model may b
 \end{algorithm}
 
 \section{Simulations}
-Simulations were run using both models over the following scenarios for 25 trials with the following permutations
+Simulations were run on four optimization functions. Measurements were given with a fixed noise corresponding to the standard deviation of the function. Both the $\sigma$-offset and Gittins models were then tested each with risk thresholds $T=[0, 0.25, 0.5]$. The case of $T=0$ for the Gittins model is equivalent to a fixed measurement window and can be used as the point of comparison. A Kalman filter with the identity function for both $F$ and $H$ was used, essentially reconciling two Gaussian distributions, with $P_w=[\frac{\sigma^2}{10}, \sigma^2, 10\sigma^2]$.
+
 \begin{table}[h]
 \centering
-\begin{tabular}{ c  c }
-  Optimization Function (f) & Hartmann-6, Ackley, Levy, Branin\\\\
-  Observation Noise ($\sigma$) & $\frac{std(f)}{10}, std(f), 10*std(f)$\\\\
-  Threshold (K) & $0$, $0.35$, $0.7$, Adaptive
+\begin{tabular}{ |c | c | c | c | c | }
+  \hline&&&&\\
+  Function & Domain & Minimum & Mean & Std\\
+  &&&&\\
+  \hline
+  &&&&\\
+  Hartmann-6 & $[0,1]^6$ & -3.322 & -0.259 & 0.383\\
+  &&&&\\
+  Ackley & $[-32.768, 32.768]^4$ & 0 & 20.882 & 1.027\\
+  &&&&\\
+  Levy & $[-10, 10]^4$ & 0 & 42.544 & 27.939\\
+  &&&&\\
+  Branin & $([-5, 10],[0, 15])$ & 0.398 & 54.452 & 51.129\\
+  &&&&\\
+  \hline
 \end{tabular}
+\caption{Optimization functions for simulations}
+\label{tab:optfunc}
 \end{table}
 

@@ -3,14 +3,25 @@
 An initial pilot was run varying 6 parameters
 \begin{table}[h]
   \centering
-  \begin{tabular}{ c c }
+  \begin{tabular}{ |c c| }
+  \hline
+  &\\
   Peak Force & Maximum force in Newtons provided\\
+  &\\
   Onset Timing & Start of assistance during the gait cycle\\
+  &\\
   Peak Timing & Point of peak force provided during the gait cycle\\
+  &\\
   Offset Timing & End of assistance during the gait cycle\\
+  &\\
   Curvature 1 & Force provided at midpoint of onset and peak\\
-  Curvature 2 & Force provided at midpoint of peak and offset
+  &\\
+  Curvature 2 & Force provided at midpoint of peak and offset\\
+  &\\
+  \hline
   \end{tabular}
+\caption{6 parameters for providing a force profile}
+\label{tab:forceparam}
 \end{table}
 
 \subsection*{Hip-only Soft Exosuit}
@@ -40,7 +51,7 @@ Two human trials with the same subjects from a previous study were conducted as 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{block}
-\caption{Diagram of Bandit Process}
+\caption{Diagram of Optimization Process}
 \label{fig:block}
 \end{figure}
 
