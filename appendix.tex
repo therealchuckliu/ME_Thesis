@@ -19,7 +19,7 @@
 \end{sidewaysfigure}
 
 %\chapter{Appendix to Chapter \ref{ch:2}}\label{cha:append-chapt-refch:2}
-\chapter{Unscented Kalman Filter\footnote{\citet{Wan00theunscented}}}\label{sec:ukf}
+\chapter{Unscented Kalman Filter\footnote{\citet{Wan00theunscented}}}\label{ch:append-ukf}
 The unscented transformation selects a representative set of points (sigma points) with associated weights to propagate through a nonlinear function. More formally, given an $N$-dimensional random variable $x$ with mean $\bar{x}$ and covariance $P_x$ we calculate the following sigma vectors 
 \begin{equation}\label{eq:unscentedtransform}
 \begin{aligned}
@@ -105,4 +105,6 @@ Then, it follows that
 			 &= \mathbb{E}[\sum_{i=0}^{\tau^* -1}\lambda^ir(X_i) + \lambda^{\tau^*}J_{\tau^*}(X_{\tau^*})] = \mathbb{E}[\sum_{i=0}^{\tau^* -1}\lambda^ir(X_i) + \lambda^{\tau^*}g(X_{\tau^*})]
 \end{align*}
 and $J_{\tau^*}(X_{\tau^*}) = g(X_{\tau^*})$ at $\tau^*$.
+
+\chapter{Simulation Results}\label{ch:append-sims}
 \end{appendices}

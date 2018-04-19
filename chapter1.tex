@@ -91,7 +91,7 @@ y_i\vert f &\sim \mathcal{N}(f, V)\\
 V &\sim \text{Inv-}\chi^2(\nu, \sigma_i^2),
 \end{split}
 \end{align}
-with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref{fig:mcmcvsmap} shows a comparison of the robust Student-t noise with the standard Gaussian noise. The majority of data points exhibit low variance, while some extreme outliers are also produced. While the Gaussian noise model treats each data point equally, the Student-t model is able to reach a noise distribution that effectively matches the underlying function.
+with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref{fig:mcmcvsmap} shows a comparison of the robust Student-t noise with the standard Gaussian noise. The majority of data points exhibit low variance, while some extreme outliers are also produced. While the Gaussian noise model treats each data point equally, the Student-t model is able to effectively pick out the outliers and recreate the underlying function.
 
 \begin{figure}[t]
 \centering
@@ -101,7 +101,7 @@ with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref
 \end{figure}
 
 \section{Implementation}
-There are a number of implementation choices relevant to HIL optimization. While the MCMC approach has shown to be more robust, GP regression scales linearly with the number of samples. As such, an accurate optimization of the acquisition function can take on the order of minutes. However, once a stopping condition is met the next parameter setting must immediately be communicated to the wearable device. In our implementation, we start an MCMC sampler concurrently with a new parameter evaluation. When the stopping condition is met, if the sampler has completed optimizing EI we use the returned parameter setting. Otherwise, we default to the MAP estimate to find the next parameter selection. There is then a tradeoff between the standard MAP estimate with a more robust MCMC sampler that uses one less training sample.
+There are a number of implementation choices relevant to HIL optimization. While the MCMC approach has shown to be more robust, GP regression scales linearly with the number of samples. Optimizing the acquisition function using a sufficient sample size is then increasingly expensive, taking on the order of minutes to evaluate. However, once a stopping condition is met the next parameter setting must immediately be communicated to the wearable device. In our implementation, we start an MCMC sampler concurrently with a new parameter evaluation. When the stopping condition is met, if the sampler has completed optimizing EI we use the returned parameter setting. Otherwise, we default to the MAP estimate to find the next parameter selection. There is then a tradeoff between the standard MAP estimate with a more robust MCMC sampler that uses one less training sample.
 
 As Chapter \ref{ch:2} will discuss, the returned metabolic estimates have an associated variance; earlier stopping points exhibit a higher variance representing greater uncertainty for the estimated cost. The GP estimates may incorrectly inflate the best observed value if a number of parameter settings nearby are stopped early (see MAP estimate in Figure \ref{fig:mcmcvsmap} for $x\in(-2, -1)$). To appropriately weight the training samples based on their estimator variances, we fix separate noise hyperparameters corresponding to each sample. In the Gaussian noise model, the regression equation then becomes
 \begin{align}
