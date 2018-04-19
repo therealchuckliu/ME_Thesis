@@ -38,7 +38,7 @@ The prediction is then reconciled with the observed measurement through a minimu
 \end{split}
 \end{align}
 
-The underlying requirement for these equations is an accurate propagation of the first two moments of $x(t)$ and $z(t)$. As such, Gaussian distributions are assumed as they have the least information. When $F$ or $H$ is nonlinear, rather than linearizing the functions with a first order approximation the UKF approximates its probability distribution through an unscented transformation. The complete implementation details for the UKF are outlined in Appendix \ref{sec:ukf}.
+The underlying requirement for these equations is an accurate propagation of the first two moments of $x(t)$ and $z(t)$. As such, Gaussian estimates are used as they assume the least information. When $F$ or $H$ is nonlinear, rather than linearizing the functions with a first order approximation the UKF approximates its probability distribution through an unscented transformation. The complete implementation details are outlined in Appendix \ref{sec:ukf}.
 
 As we consider $\tau_0, \tau, c, c_0$ to be constant parameters, our UKF setup is
 \begin{align}
@@ -56,13 +56,22 @@ The UKF algorithm has covariance parameters $P_{x}$ for the state estimate, $P_{
   \centering
   \begin{tabular}{ | c | M{10cm} |}
   \hline
-  Increase In & Effect On State Estimate \\ \hline
-
-  $P_x$ & A higher initial covariance on the state estimate implies higher uncertainty with the state prior. Early observations will have a greater effect on the state update. However, $P_x$ decreases after every state update; observations therefore will have a smaller effect on the state estimate over time\\ \hline
-
-  $P_w$ & A higher measurement noise will reduce an observation's effect on the state update. The state will be to slow to move away from the prior, particularly in early observations. $P_w$ also affects $P_x$ on future timesteps, as the covariance is bounded by $P_w$\\ \hline
-
-  $P_v$ & While $F$ is essentially the identity function in the metabolics model as the cost and time parameters are assumed to be constant, $P_v$ encapsulates the error in that model as well as outside disturbances that can't be measured such as fatigue. Increasing $P_v$ can be used to enforce a lower bound on the effect of an observation to the state update\\ \hline
+  &\\
+  Increase & Effect On State Estimate \\ 
+  &\\
+  \hline
+  &\\
+  $P_x$ & A higher initial covariance on the state estimate implies higher uncertainty with the state prior. Early observations will have a greater effect on the state update. However, $P_x$ decreases after every state update; observations therefore will have a smaller effect on the state estimate over time\\ 
+  &\\
+  \hline
+  &\\
+  $P_w$ & A higher measurement noise will reduce an observation's effect on the state update. The state will be to slow to move away from the prior, particularly in early observations. $P_w$ also affects $P_x$ on future timesteps, as it is bounded by $P_w$\\ 
+  &\\
+  \hline
+  &\\
+  $P_v$ & While $F$ is essentially the identity function in the metabolics model as the cost and time parameters are assumed to be constant, $P_v$ encapsulates the error in that model as well as outside disturbances that can't be measured such as fatigue. Increasing $P_v$ can be used to enforce a lower bound on the effect of an observation to the state update\\ 
+  &\\
+  \hline
 
   \end{tabular}
   \caption{Tuning Parameters for metabolic estimator}
@@ -81,9 +90,7 @@ The volatility of the estimator is dependent on the calibration of the covarianc
 \section{Testing and Future Improvements}
 Using previously attained metabolic data, Figure \ref{fig:ukftuned} shows the raw and noisy measurements taken and the metabolic cost prediction that the model developed in response to a representative participant\footnote{Testing carried out by Myunghee Kim}. The bottom plot displays the covariance associated with the cost, beginning with a covariance of 1 and converging at different rates depending upon the raw data. When tuned properly, both trials see a relatively smooth rate of convergence of the estimate. With varying amounts of data provided, the accuracy in percent error was calculated by comparing with a "ground truth" value at each termination condition (5 min, 2 min, 1.5 min, 20 breaths, and 30 breaths). This ground truth value is the average of the last two minutes of data, when the subject has reached steady-state.
 
-During trial testing for our optimization methods, the UKF estimator showed various levels of volatility across subjects (Figure \ref{fig:subjcostest}). Future work on the estimator would involve creating a cost function to optimize across the various covariance parameters, as these values should also be subject-specific. The cost function should balance between the smoothness of the estimation curve and eventual convergence to the "true" instantaneous energetic cost. As Bayesian optimization starts with an exploration phase that will measure a specified number of points for the maximum duration, the estimator can then be tuned real-time a posteriori. Without this tuning, Chapter \ref{ch:3} will go into modeling the stopping problem while taking into account the accuracy of the estimator. 
-
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\textwidth]{ukf}
 
@@ -103,7 +110,9 @@ During trial testing for our optimization methods, the UKF estimator showed vari
 \label{fig:ukftuned}
 \end{figure}
 
-\begin{figure}[h]
+During trial testing for our optimization methods, the UKF estimator showed various levels of volatility across subjects (Figure \ref{fig:subjcostest}). Future work on the estimator would involve creating a cost function to optimize across the various covariance parameters, as these values should also be subject-specific. The cost function should balance between the smoothness of the estimation curve and eventual convergence to the "true" instantaneous energetic cost. As Bayesian optimization starts with an exploration phase that will measure a specified number of points for the maximum duration, the estimator can then be tuned real-time a posteriori. Without this tuning, Chapter \ref{ch:3} will go into modeling the stopping problem while taking into account the accuracy of the estimator. 
+
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{subjcostest.png}
 \caption{Tuned UKF Estimator shows different levels of volatility during optimization studies on different subjects.}

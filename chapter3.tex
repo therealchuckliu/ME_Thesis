@@ -39,7 +39,7 @@ $V(x) = J_0(x)$ and the optimal stopping time is
 \begin{align}
   \tau = \min_{t \geq 0}J_t(X_t) = g(X_t)
 \end{align}
-For a derivation of the optimal stopping time, see Appendix \ref{thm:ost}. The rest of this chapter covers how to formulate the stopping problem within an iteration of Bayesian optimization using the metabolic cost estimator. Let $N$ be the maximum number of measurements allowed at a parameter evaluation, $\hat{x}_t \sim \mathcal{N}(\mu_{x_t}, \sigma^2_{x_t})$ the cost estimate and associated variance for the current evaluation, and $\hat{x}^* \sim \mathcal{N}(\mu_{x^*}, \sigma^2_{x^*})$ the cost estimate and variance for the best parameter setting found thus far. As there is an exploration phase $\hat{x}^*$ will always be defined (Algorithm \ref{alg:bayesopt}).
+For a derivation of the optimal stopping time, see Appendix \ref{thm:ost}. The rest of this chapter covers how to formulate the stopping problem within an iteration of Bayesian optimization using the metabolic cost estimator. Let $N$ be the maximum number of measurements allowed at a parameter evaluation, $\hat{x}_t \sim \mathcal{N}(\mu_{x_t}, \sigma^2_{x_t})$ the cost estimate and associated variance for the current evaluation, and $\hat{x}^* \sim \mathcal{N}(\mu_{x^*}, \sigma^2_{x^*})$ the cost estimate and variance for the best parameter setting found thus far. As Bayesian optimization starts with an exploration phase, $\hat{x}^*$ will always be defined (Algorithm \ref{alg:bayesopt}).
 
 \section{$\sigma$-scaled Offset}
 The $\sigma$-scaled offset model directly embeds $\hat{x}_t$ and $\hat{x}^*$ into the stopping problem. The best estimate of the difference in energetic costs is given by the following Gaussian distribution
@@ -51,7 +51,7 @@ The $\sigma$-scaled offset model directly embeds $\hat{x}_t$ and $\hat{x}^*$ int
 \end{split}
 \end{align}
 
-The stopping problem state is then the estimate difference, with a non-Markovian transition model of independent draws from the same Gaussian distribution. The reward function incentivizes continuing the lower $x_t$ seems relative to $x^*$. In summary,
+The stopping problem state is then the estimate difference, with a non-Markovian transition model of independent draws from the same Gaussian distribution. The lower $x_t$ seems relative to $x^*$, the higher the reward function incentivizes continuing. In summary,
 
 \begin{align}
 \begin{split}
@@ -62,7 +62,7 @@ The stopping problem state is then the estimate difference, with a non-Markovian
   g(x) &= 0,
 \end{split}
 \end{align}
-where $K$ is a $\sigma$-scaled offset to provide some risk averseness to the estimate. The optimal stopping point for this formulation can be characterized as the first time $X_t > k\sigma$. As more measurements are taken and $P_{x}$ decreases, $\sigma^2$ decreases the offset accordingly.
+where $K$ is a $\sigma$-scaled offset to provide some risk averseness to the estimate. The optimal stopping point for this formulation can be characterized as the first time $X_t > K\sigma$. As more measurements are taken and $P_{x}$ decreases, $\sigma^2$ decreases the offset accordingly.
 
 As shown in Section \ref{sec:ukfcovar}, underestimating $P_w$ can cause the estimator to exhibit high volatility. Additionally, since a subsequent state covariance update $P_x(t+1)$ is bounded by $P_w$, a lower $P_w$ will also cause $\sigma^2$ to be underestimated. With the $\sigma$-scaled offset model, underestimating the noisiness of observations could potentially cause promising parameter settings to stop measuring early as there is no fault tolerance for crossing the threshold. 
 
@@ -76,8 +76,7 @@ In our case, successes and failures can be based on $\mu, \sigma^2$ using the Pr
 
 where $\Phi$ is the CDF for a standard normal distribution. A success can then be defined as $PI(\mu, \sigma^2) > T$ for some defined risk tolerance measure $T$. $PI$ is inflated by a high $\sigma^2$ initially, and as more measurements are taken $PI$ similarly decreases. 
 
-The state follows a Beta distribution where parameters $\alpha,\beta$ correspond to the count of successes and failures, and transitions follow the posterior of the Beta distribution. In summary,
-
+The stopping problem state follows a Beta distribution where parameters $\alpha,\beta$ correspond to the count of successes and failures, and transitions follow the posterior of the Beta distribution. In summary,
 \begin{align}
 \begin{split}
   X_t &= (\alpha_t + \alpha_0, \beta_t + \beta_0) \\
@@ -99,17 +98,26 @@ Gittins and Jones showed that an optimal policy could be constructed by calculat
 \end{align}
 The Gittins Index is generally used for infinite horizon stopping problems, with $g(x)=\frac{\nu(x)}{1-\lambda}$ representing an infinite geometric sum to compensate for all future rewards. By setting $\lambda=1-\frac{1}{N}$, $\forall x \; 0 \leq \nu(x) \leq 1$.
 
-The stopping condition for the one-armed bandit problem is equivalent to a two-armed bandit problem, where an imaginary second arm provides a constant reward $V$ \citep{gelman2004bayesian}. The optimal policy corresponds to playing the arm as long as it's Gittins Index is above $V$. As $T$ and $V$ are correlated, one of the parameters can be fixed (such as $T=0.5$) while the other is tuned to a preferred risk tolerance for expected success rate.
+In the case of a multi-armed bandit problem, the optimal policy is to play the arm with the highest Gittins Index. \citet{gelman2004bayesian} shows that the stopping problem, or the one-armed bandit problem, is equivalent to having a second arm that provides a constant reward $V$. The optimal policy then corresponds to playing the arm as long as its Gittins Index is above a specified threshold $V$. As $T$ and $V$ are correlated, one of the parameters can be fixed (such as $T=0.5$) while the other is tuned to a preferred risk tolerance for expected success rate. 
+
+This approach essentially acts as a low-pass filter for a potentially noisy metabolic estimator. The choice for $V$ can similarly be thought of in terms of a Gittins Index 
+\begin{align}
+\begin{split}
+  \nu((\alpha, \beta)) &= V\\
+  \alpha + \beta &= N,
+\end{split}
+\end{align}
+where $N$ is the maximum measurement duration for a parameter setting. This is in essence asking the question: "If I were to measure this parameter setting for the full duration, what is the minimum number of successes that I would need to see to say this was worthwhile?".
 
 \section{Adaptive Thresholds}
-Having a constant risk threshold in either the $\sigma$-offset or Gittins model may be difficult to tune across subjects. Another approach is to use the exploration phase of Bayesian optimization to create a schedule for the thresholds adapted to the subject's measurements. Let $M$ and $\Sigma$ be $\vert \mathbb{E}\vert \times N$ matrices providing traces where $M_{ij}, \Sigma_{ij}$ correspond to $\mu_{x_j}, \sigma^2_{x_j}$ for exploration point $i$ and measurement $j$. For each exploration point, the $\hat{x}^*$ distribution can be the final distribution at measurement $N$ so as to have a sense of the magnitude of thresholds for comparing similar cost estimates. Algorithm $\ref{alg:adapthresh}$ details the calculation of a threshold vector $A$.
+Both the $\sigma$-offset and Gittins model have a risk tolerance threshold that may be difficult to tune across subjects. Another approach is to use the exploration phase of Bayesian optimization to create a schedule for the thresholds adapted to the subject's measurements. A simple approach would be to see the trajectory of thresholds if the stopping problem were run on the exploration phase, and accordingly assign the most risk averse to use during the optimization. Let $M$ and $\Sigma$ be $\vert \mathbb{E}\vert \times N$ matrices providing traces where $M_{ij}, \Sigma_{ij}$ correspond to $\mu_{x_j}, \sigma^2_{x_j}$ for exploration point $i$ and measurement $j$. For each exploration point, the $\hat{x}^*$ distribution can be the final distribution, $(M_{iN}, \Sigma_{iN})$, so as to have a sense of the magnitude of thresholds when comparing similar cost estimates. Algorithm $\ref{alg:adapthresh}$ details the calculation of a threshold vector $A$.
 
 \begin{algorithm}[t]
 \caption{Determining threshold levels for either model based on subject's exploration data. With the $\sigma$-offset, the higher threshold is more risk averse, while with the Gittins model the lower is.}
 \label{alg:adapthresh}
 \begin{algorithmic}
-\State \textkeyword{Define $\vert\mathbb{E}\vert \times N$ Matrix } $X$
-\State \textkeyword{Define $N$-Vector } $A$
+\State \textkeyword{Init $\vert\mathbb{E}\vert \times N$ Matrix } $X$
+\State \textkeyword{Init $N$-Vector } $A$
 \State \textkeyword{Define Window } $W$
 \For{i=1}{\vert \mathbb{E} \vert}
   \State $\alpha = \alpha_0, \beta = \beta_0$
@@ -128,10 +136,10 @@ Having a constant risk threshold in either the $\sigma$-offset or Gittins model 
 \End
 \For{i=1}{N}
   \If{Offset}
-    \State $A_{i} = MAX\{X_{rc}\vert 1 \leq r \leq N, i-W \leq c \leq i+W\}$
+    \State $A_{i} = MAX\{X_{rc}\vert 1 \leq r \leq \vert\mathbb{E}\vert, i-W \leq c \leq i+W\}$
   \EndIf
   \If{Gittins}
-    \State $A_{i} = MIN\{X_{rc}\vert 1 \leq r \leq N, i-W \leq c \leq i+W\}$
+    \State $A_{i} = MIN\{X_{rc}\vert 1 \leq r \leq \vert\mathbb{E}\vert, i-W \leq c \leq i+W\}$
   \EndIf
 \End
 \State Return $A$
@@ -139,7 +147,7 @@ Having a constant risk threshold in either the $\sigma$-offset or Gittins model 
 \end{algorithm}
 
 \section{Simulations}
-Simulations were run on four optimization functions. Measurements were given with a fixed noise corresponding to the standard deviation of the function. Both the $\sigma$-offset and Gittins models were then tested each with risk thresholds $T=[0, 0.25, 0.5]$. The case of $T=0$ for the Gittins model is equivalent to a fixed measurement window and can be used as the point of comparison. A Kalman filter with the identity function for both $F$ and $H$ was used, essentially reconciling two Gaussian distributions, with $P_w=[\frac{\sigma^2}{10}, \sigma^2, 10\sigma^2]$.
+Simulations were run on four optimization functions. Measurements were given with a fixed noise corresponding to the standard deviation of the function. Both the $\sigma$-offset and Gittins models were then tested each with risk thresholds $T=[0, 0.25, 0.5]$. The case of $T=0$ for the Gittins model is equivalent to a fixed measurement window and can be used as the point of comparison. A Gaussian state estimate was continually reconciled with new observations, equivalent to a Kalman filter with the identity function and additive noise for both $F$ and $H$, and measurement noise was tuned to $P_w=[\frac{\sigma^2}{10}, \sigma^2, 10\sigma^2]$.
 
 \begin{table}[h]
 \centering
