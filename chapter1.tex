@@ -110,9 +110,9 @@ As Chapter \ref{ch:2} will discuss, the returned metabolic estimates have an ass
   \bar{\sigma}^2(x) &= \kappa(x, x\vert \theta) - K(X, x)^T[K(X,X) + \Sigma]^{-1}K(X,x),
 \end{split}
 \end{align}
-where $\Sigma$ is a diagonal matrix of entries $\{\sigma_i^2\}$ corresponding to scaled variance estimates of each data point \citep{Kersting:2007:MLH:1273496.1273546}. In the case of the MCMC model, each $y_i$ is defined independently with a noise parameter already. Figure \ref{fig:fixednoise} gives an example of the effect of fixed noise hyperparameters on the GP. Additionally, we define $y^*$ in Expected Improvement as the best mean estimate rather than the observed value. The best observed value is equally likely to be an outlier among a set of nearby points that were all measured for the full duration, so we base our decision on the variance-scaled Gaussian process estimates.
+where $\Sigma$ is a diagonal matrix of entries $\{\sigma_i^2\}$ corresponding to scaled variance estimates of each data point \citep{Kersting:2007:MLH:1273496.1273546}. In the case of the MCMC model, each $y_i$ is defined independently with a noise parameter already. Figure \ref{fig:fixednoise} gives an example of the effect of fixed noise hyperparameters on the GP. Additionally, we define $y^*$ in Expected Improvement as the best mean estimate rather than the observed value. The best observed value is equally likely to be an outlier among a set of nearby points that were all measured for the full duration, so the Gaussian process estimates are used instead.
 
-\begin{figure}[ht]
+\begin{figure}[t]
 \includegraphics[width=\textwidth]{fixednoise.png}
 \caption{Demonstration of the effect of fixing measurement noise. Using the same data from Figure \ref{fig:mcmcvsmap}, the noise associated with each data point is fixed and inversely proportional to the true accuracy - in effect telling the GP that the minority outliers are the more accurate values. This may arise in our stopping problem where a minimum is found (measured for the full duration, resulting variance is relatively low) and many nearby points are subsequently sampled and stopped early (resulting variances are very high).}
 \label{fig:fixednoise}

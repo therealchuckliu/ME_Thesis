@@ -68,7 +68,7 @@ As shown in Section \ref{sec:ukfcovar}, underestimating $P_w$ can cause the esti
 \section{Gittins Index}
 A more fault-tolerant model is drawn from literature related to the multi-armed bandit problem (MAB), which represents a sequential decision making problem where at any given time a player must select from different options (or arms) that then responds with a variable reward. Historically this has been used in a clinical context, where a physician must select from one of several different treatment options when presented a patient and receives binary rewards of either successes or failures \citep{Villar2015}. A stopping problem has also been described as a one-armed bandit problem \citep{FergusonStopping2006}.
 
-In our case, successes and failures can be based on $\mu, \sigma^2$ using the Probability of Improvement (PI) metric
+Successes and failures can be based on $\mu, \sigma^2$ using the Probability of Improvement (PI) metric
 \begin{align}
   PI(\mu, \sigma^2) = \Phi(\frac{\mu}{\sigma}),
 \end{align}
@@ -146,13 +146,7 @@ Both the $\sigma$-offset and Gittins model have a risk tolerance threshold that 
 \end{algorithm}
 
 \section{Simulations}
-Simulations were run on four optimization functions with Gaussian noise proportional to standard deviation added to measurements. Both the $\sigma$-offset and Gittins models were tested each with risk thresholds $T=[0, 0.25, 0.5]$. The case of $T=0$ for the Gittins model is equivalent to a fixed measurement window and can be used as the point of comparison. A Gaussian state estimate was continually reconciled with new observations, equivalent to a Kalman filter with the identity function plus additive noise for both $F$ and $H$, and measurement noise was tuned to different scenarios $P_w=[\frac{\sigma^2}{10}, \sigma^2, 10\sigma^2]$. The same measurements from exploration points were provided for each function under all scenarios.
-
-For time $t$, let $x_t$ be the GP's estimated minimum point. The figures chart
-\begin{align}
-  y_t = \frac{f(x_t) - f(x^*)}{f(x_0) - f(x^*)},
-\end{align}
-where $f$ is the true, noiseless function and $f(x^*)$ is the function minimum. Results from simulations are provided in Appendix \ref{ch:append-sims}. 
+Simulations were run on four optimization functions (Table \ref{tab:optfunc}) with Gaussian noise added proportional to the standard deviation of the respective function. The Hartmann-6 and Ackley functions have larger domain spaces with lower standard deviations, generally making them more difficult functions to optimize using Bayesian optimization. While the Levy and Branin functions have large regions of local minima, and in Branin's case three global minima, much higher noise is added due to the standard deviations of the respective functions.
 
 \begin{table}[t]
 \centering
@@ -176,3 +170,18 @@ where $f$ is the true, noiseless function and $f(x^*)$ is the function minimum. 
 \label{tab:optfunc}
 \end{table}
 
+Both the $\sigma$-offset and Gittins models were tested each with risk thresholds $T=[0, 0.25, 0.5, AD]$ where $AD$ is the adaptive threshold method. A Gaussian state estimate was continually reconciled with new observations, equivalent to a Kalman filter with the identity function plus additive noise for both $F$ and $H$, and measurement noise was tuned to different scenarios $P_w=[\frac{\sigma^2}{10}, \sigma^2, 10\sigma^2]$. $P_x$ was initialized to $\mu, \sigma^2$ of the function, and $P_v=\frac{\sigma^2}{100}$. The same observations from exploration points were provided for each function under all scenarios, and the maximum duration was set to 45 measurements.
+
+For time $t$, let $x_t$ be the GP's estimated minimum point. The figures chart
+\begin{align}
+  y_t = \frac{f(x_t) - f(x^*)}{f(x_0) - f(x^*)},
+\end{align}
+where $f$ is the true, noiseless function and $f(x^*)$ is the function minimum.
+
+Results from simulations averaged over 100 trials are provided in Appendix \ref{ch:append-sims}. The exploration phase is omitted from the figures as the same observations were used for all scenarios, though final estimates may vary across different $P_w$ values. The case of $T=0$ for the Gittins model is equivalent to a fixed measurement window and can be used as the point of comparison. Stopping early shows a clear benefit in Hartmann and Ackley, the less noisy functions. The $\sigma$-offset method generally outperforms the Gittins in these situations, and is comparable only to the most aggressive $T=0.5$ case. As there is minimal noise, different levels of $P_w$ show only slight differences. 
+
+In the case of higher noise with Branin and Levy, only Levy shows a clear advantage to stopping early. With the more fault-tolerant Gittins approach, different levels of $P_w$ still show relatively consistent performance, while having a constant threshold in the $\sigma$-offset model quickly stagnates when underestimating measurement noise. Note these functions are not strictly decreasing - this implies a training sample has been added that causes the Gaussian process to incorrectly assume a new minimum point. As $P_w$ increases this becomes less apparent; a higher $P_w$ causes $\sigma^2$ of the model to also increase, and as both models are $\sigma$-scaled the thresholds are rarely met until a more refined estimate is made. 
+
+The adaptive thresholds show fairly consistent performance across all scenarios, including with underestimating $P_w$ in the $\sigma$-offset model. Generally a higher $P_w$ estimate allows for a more predictable trajectory, which makes the adaptive thresholds more effective. In these experiments, eight exploration points were used, making the exploration phase one third of the entire trial time. Additional tests would include decreasing the number of exploration points, especially in the case of underestimating $P_w$ with either the Branin or Levy functions, and altering the maximum duration window.
+
+To date, wearable devices have shown to provide a metabolic reduction on the order of twenty percent. The standard deviation in metabolic rate across parameter settings, while heavily subject dependent, has ranged from ten to thirty percent across our trials so far, making the Branin and Levy functions a more appropriate comparison. Though difficult to measure the noisiness of metabolics as there is no true instantaneous energetic costs to compare against, the importance of the relative magnitudes between $P_w$ and $P_x$, $P_v$ are clear in both affecting the stopping process as well as Gaussian process estimates. The bandit model aims to reduce the effect of incorrectly assigning values to these covariances, while the $\sigma$-offset model generally performed the best when tuned properly.
