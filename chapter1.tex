@@ -43,7 +43,7 @@ Given a Gaussian distribution at point $x$, an acquisition function captures how
   \end{split}\\
   z &= \frac{y^* - \bar{\mu}(x) + \xi}{\bar{\sigma}(x)}\nonumber,
 \end{align}
-where $y^*$ is the best value observed so far and $\xi$ is a scaling parameter to adjust the tradeoff between exploration-exploitation \citep{Lizotte:2008:PBO:1626686}. The next point to evaluate is then chosen as $x^* = \argmax_{x} EI(x \vert \mathbb{S})$. Figure \ref{fig:ei} shows a few iterations of Bayesian Optimization on a sample function.
+where $y^*$ is the best value observed so far, $\Phi(z)$ and $\phi(z)$ are the standard normal CDF and PDF functions, and $\xi$ is a scaling parameter to adjust the tradeoff between exploration-exploitation \citep{Lizotte:2008:PBO:1626686}. The next point to evaluate is then chosen as $x^* = \argmax_{x} EI(x \vert \mathbb{S})$. Figure \ref{fig:ei} shows a few iterations of Bayesian Optimization on a sample function.
 
 The choice of $y^*$ can be defined as the minimum observed value so far, the minimum $\bar{\mu}(x)$ under the current GP model over all previous observations, or some biased version thereof \citep{Lizotte:2008:PBO:1626686}. 
 
@@ -82,7 +82,7 @@ Instead of using a single point estimate, a full Bayesian approach would involve
 
 The MCMC approach is also used in more complex noise models whose posterior distribution and marginal likelihood are no longer analytically tractable. \citet{NIPS2009_3806,Jylanki:2011:RGP:1953048.2078209} developed a more robust noise model based on the Student-t distribution to handle occurrences of large outliers in the collected data. The noise distribution follows
 \begin{align}
-p(y\vert f,\sigma_n^2,\nu) = \frac{\Gamma (\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\nu\pi}\sigma_n})(1 + \frac{(y-f)^2}{\nu\sigma_n^2})^{\frac{-(\nu + 1)}{2}}
+p(y\vert f,\sigma_n^2,\nu) = (\frac{\Gamma (\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\nu\pi}\sigma_n})(1 + \frac{(y-f)^2}{\nu\sigma_n^2})^{\frac{-(\nu + 1)}{2}}
 \end{align} 
 where $\nu$ is a degrees of freedom hyperparameter. A Gibbs sampler can be performed through a hierarchical model where each training sample's output noise follows an independent inverse chi-squared distribution
 \begin{align}
@@ -101,7 +101,7 @@ with $\theta$ alternately sampled according to the Gaussian Process. Figure \ref
 \end{figure}
 
 \section{Implementation}
-There are a number of implementation choices relevant to HIL optimization. While the MCMC approach has shown to be more robust, GP regression scales linearly with the number of samples. Optimizing the acquisition function using a sufficient sample size is then increasingly expensive, taking on the order of minutes to evaluate. However, once a stopping condition is met the next parameter setting must immediately be communicated to the wearable device. In our implementation, we start an MCMC sampler concurrently with a new parameter evaluation. When the stopping condition is met, if the sampler has completed optimizing EI we use the returned parameter setting. Otherwise, we default to the MAP estimate to find the next parameter selection. There is then a tradeoff between the standard MAP estimate with a more robust MCMC sampler that uses one less training sample.
+There are a number of implementation choices relevant to HIL optimization. While the MCMC approach has shown to be more robust, GP regression is already an $O(n^3)$ operation where $n$ represents the number of function evaluations. With MCMC, the GP regression becomes $O(mn^3)$ for $m$ samples. Optimizing the acquisition function using a sufficient sample size is then increasingly expensive, taking on the order of minutes to evaluate. However, once a stopping condition is met the next parameter setting must immediately be communicated to the wearable device. In our implementation, we start an MCMC sampler concurrently with a new parameter evaluation. When the stopping condition is met, if the sampler has completed optimizing EI we use the returned parameter setting. Otherwise, we default to the MAP estimate to find the next parameter selection. There is then a tradeoff between the standard MAP estimate with a more robust MCMC sampler that uses one less training sample.
 
 As Chapter \ref{ch:2} will discuss, the returned metabolic estimates have an associated variance; earlier stopping points exhibit a higher variance representing greater uncertainty for the estimated cost. The GP estimates may incorrectly inflate the best observed value if a number of parameter settings nearby are stopped early (see MAP estimate in Figure \ref{fig:mcmcvsmap} for $x\in(-2, -1)$). To appropriately weight the training samples based on their estimator variances, we fix separate noise hyperparameters corresponding to each sample. In the Gaussian noise model, the regression equation then becomes
 \begin{align}

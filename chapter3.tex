@@ -25,7 +25,7 @@ With an estimate and associated variance for the instantaneous energetic cost, t
 
 The objective is to find $\tau$ that maximizes
 \begin{align}
-  V(x) = \max_{\tau: \tau \leq N} \mathbb{E}[\lambda^{\tau} g(X_{\tau}) + \sum_{i=0}^{\tau-1} \lambda^{i}r(X_j) \vert X_0 = x]
+  V(x) = \max_{\tau: \tau \leq N} \mathbb{E}[\lambda^{\tau} g(X_{\tau}) + \sum_{i=0}^{\tau-1} \lambda^{i}r(X_j) \vert X_0 = x].
 \end{align}
 
 The value function can be computed via backward induction by defining
@@ -37,7 +37,7 @@ The value function can be computed via backward induction by defining
 \end{align}
 then $V(x) = J_0(x)$ and the optimal stopping time is
 \begin{align}
-  \tau = \min_{t \geq 0}J_t(X_t) = g(X_t)
+  \tau = \min_{t \geq 0}J_t(X_t) = g(X_t).
 \end{align}
 For a derivation of the optimal stopping time, see Appendix \ref{thm:ost}. We aim to formulate the stopping problem in terms of the metabolic estimator. Let $N$ be the maximum measurements allowed at a parameter evaluation, $\hat{x}_t \sim \mathcal{N}(\mu_{x_t}, \sigma^2_{x_t})$ the cost estimate and associated variance for the current evaluation, and $\hat{x}^* \sim \mathcal{N}(\mu_{x^*}, \sigma^2_{x^*})$ the cost estimate and variance for the best parameter setting found thus far as defined by the Gaussian process. As Bayesian optimization starts with an exploration phase, $\hat{x}^*$ will always be defined (Algorithm \ref{alg:bayesopt}).
 
@@ -47,7 +47,7 @@ The $\sigma$-scaled offset model directly embeds $\hat{x}_t$ and $\hat{x}^*$ int
 \begin{split}
   \hat{x}_t - \hat{x}^* &\sim \mathcal{N}(\mu, \sigma^2)\\
   \mu &= \mu_{x_t} - \mu_{x^*}\\
-  \sigma^2 &= \sigma^2_{x_t} + \sigma^2_{x^*}
+  \sigma^2 &= \sigma^2_{x_t} + \sigma^2_{x^*}.
 \end{split}
 \end{align}
 
@@ -86,14 +86,14 @@ The stopping problem state follows a Beta distribution where parameters $\alpha,
       (\alpha_t + \alpha_0, \beta_t + \beta_0 + 1)
       \\ \tab\text{w.p. } \frac{\beta_t + \beta_0}{\alpha_t + \alpha_0 + \beta_t + \beta_0}
   \end{cases}\\
-  r((\alpha_t + \alpha_0, \beta_t + \beta_0)) &= \frac{\alpha_t + \alpha_0}{\alpha_t + \alpha_0 + \beta_t + \beta_0},\\
+  r(X_t) &= \frac{\alpha_t + \alpha_0}{\alpha_t + \alpha_0 + \beta_t + \beta_0},\\
 \end{split}
 \end{align}
 where $\alpha_0,\beta_0$ are smoothing priors and $\alpha_t,\beta_t$ are successes and failures up to time $t$.
 
 Gittins and Jones showed that an optimal policy could be constructed by calculating a value called the Gittins Index \citep{doi:10.1002/9781118596333.ch24}. Let $g(x) = K$ for some constant $K$, then the Gittins Index is defined as
 \begin{align}
-  \nu(x) = (1-\lambda)\min_{K} \{J_0(x) = K\}
+  \nu(x) = (1-\lambda)\min_{K} \{J_0(x) = K\}.
 \end{align}
 The Gittins Index is generally used for infinite horizon stopping problems, with $g(x)=\frac{\nu(x)}{1-\lambda}$ representing an infinite geometric sum to compensate for all future rewards. By setting $\lambda=1-\frac{1}{N}$, $\forall x \; 0 \leq \nu(x) \leq 1$.
 

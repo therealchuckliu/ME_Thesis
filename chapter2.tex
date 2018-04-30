@@ -25,7 +25,7 @@ where $x(t)$ represents the unobserved state of the system, $z(t)$ the observed 
 First, a prediction is made for the state of the system after one timestep. Let $\hat{x}(t\vert t-1)$ represent the estimate for $x(t)$ using measurements $\mathbb{Z}(t-1)=[z(1), z(2), ..., z(t-1)]$ and $P_{x}(t\vert t-1)$ the covariance for the estimate. The prediction step aims to calculate
 \begin{align}\begin{split}
   \hat{x}(t\vert t-1) &= \mathbb{E}[F(x(t-1), v(t-1), t-1)\vert \mathbb{Z}(t-1)]\\
-  P_{x}(t\vert t-1) &= \mathbb{E}[\{ \hat{x}(t\vert t-1) - x(t) \} \{ \hat{x}(t\vert t-1) - x(t) \}^T \vert \mathbb{Z}(t-1)]
+  P_{x}(t\vert t-1) &= \mathbb{E}[\{ \hat{x}(t\vert t-1) - x(t) \} \{ \hat{x}(t\vert t-1) - x(t) \}^T \vert \mathbb{Z}(t-1)].
 \end{split}\end{align}
 
 The prediction is then reconciled with the observed measurement through a minimum mean-squared estimate $\hat{x}(t)$ and covariance $P_{x}(t)$ according to the following equations
@@ -34,7 +34,7 @@ The prediction is then reconciled with the observed measurement through a minimu
   \hat{x}(t) &= \hat{x}(t\vert t-1) + K \mathbb{E}[y] \\
   P_{x}(t) &= P_{x}(t\vert t-1) - KP_{y}(t\vert t-1) K^T\\
   K &= P_{xy}(t\vert t-1) P_{y}^{-1}(t\vert t-1)\\
-  y &= z(t) - H(\hat{x}(t\vert t-1) , w(t), t)
+  y &= z(t) - H(\hat{x}(t\vert t-1) , w(t), t).
 \end{split}
 \end{align}
 
@@ -43,9 +43,9 @@ The underlying requirement for these equations is an accurate propagation of the
 As we consider $\tau_0, \tau, c, c_0$ to be constant parameters, our UKF setup is
 \begin{align}
 \begin{split}
-  x = &[c_0 \tab c \tab \tau_0 \tab \tau]\\
+  x = &[c_0 \text{ } c \text{ } \tau_0 \text{ } \tau]\\
   F(x&(t), v(t), t) = x(t) + v(t)\\
-  H(x(t)&, w(t), t) = m_t(x(t)) + w(t)
+  H(x(t)&, w(t), t) = m_t(x(t)) + w(t).
 \end{split}
 \end{align}
 
@@ -65,7 +65,7 @@ The UKF algorithm has covariance parameters $P_{x}$ for the state estimate, $P_{
   &\\
   \hline
   &\\
-  $P_w$ & A higher measurement noise will reduce an observation's effect on the state update. The state will be to slow to move away from the prior, particularly in early observations. $P_w$ also affects $P_x$ on future timesteps, as it is bounded by $P_w$\\ 
+  $P_w$ & A higher measurement noise will reduce an observation's effect on the state update. The state will be slow to move away from the prior, particularly in early observations. $P_w$ also affects $P_x$ on future timesteps, as it is bounded by $P_w$\\ 
   &\\
   \hline
   &\\
