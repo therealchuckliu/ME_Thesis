@@ -65,7 +65,7 @@ Accurate to the second order, the Unscented Kalman Filter incorporates this tran
   \State Measurement Update:
   \begin{align*}
   	P_{y}(t\vert t-1) &= \sum_{i=1}^{2N}W_i^{(c)}\{\mathbb{Z}_i(t\vert t-1) - \hat{z}(t\vert t-1)\}\{\mathbb{Z}_i(t\vert t-1) - \hat{z}(t\vert t-1)\}^T\\
-  	P_{xy}(t\vert t-1) &= \sum_{i=1}^{2N}W_i^{(c)}\{\chi_i^x(t\vert t-1) - \hat{x}(t\vert t-1)\}\{\chi_i^x(t\vert t-1) - \hat{x}(t\vert t-1)\}^T\\
+  	P_{xy}(t\vert t-1) &= \sum_{i=1}^{2N}W_i^{(c)}\{\chi_i^x(t\vert t-1) - \hat{x}(t\vert t-1)\}\{\mathbb{Z}_i(t\vert t-1) - \hat{z}(t\vert t-1)\}^T\\
   	K &= P_{xy}(t\vert t-1)P^{-1}_{y}(t\vert t-1)\\
   	\hat{x}(t) &= \hat{x}(t\vert t-1) + K(z(t) - \hat{z}(t\vert t-1))\\
   	P_{x}(t) &= P_{x}(t\vert t-1) - KP_{y}(t\vert t-1)K^T
