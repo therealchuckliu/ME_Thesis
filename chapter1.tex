@@ -72,7 +72,7 @@ The values of the hyperparameters in the kernel function are critical to determi
   \State Update GP Hyperparameters $\theta$
   \State Given $f(x\vert \theta, \mathbb{S}) \sim \mathcal{N}(\mu_x, \sigma_x^2)$,
   \State $x^* = \argmax_{x \in \mathbb{X}} g(\mu_x, \sigma_x^2)$
-  \State $\mathbb{S} = \mathbb{S} \cup \{x^*, f(x^*)\}$
+  \State $\mathbb{S} = \mathbb{S} \cup \{x^*, F(x^*)\}$
 \End
 \end{algorithmic}
 \end{algorithm}

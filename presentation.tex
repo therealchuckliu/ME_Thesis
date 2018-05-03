@@ -1,0 +1,211 @@
+
+
+\documentclass[compress, xcolor=pst]{beamer}
+%\documentclass[compress, xcolor=pst, handout]{beamer}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\mode<presentation>
+\usepackage{amsfonts, amsmath, amssymb, color}
+\useoutertheme{smoothbars}
+\usecolortheme{dolphin}
+\usecolortheme{rose}
+\usepackage{chngpage}
+%\usepackage{beamerthemesplit}
+\usepackage{lscape}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{enumerate}
+\usepackage{comment}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+\usepackage{multimedia}
+%% === bibliography packages ===
+%\usepackage{natbib}
+%\bibliographystyle{natbib}
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamersize{description width=0.5cm}
+\setbeamertemplate{navigation symbols}{}
+
+%\usepackage{spacingset}
+\newcommand\spacingset[1]{\renewcommand{\baselinestretch}%
+{#1}\small\normalsize}
+
+\usepackage[plain]{algorithm}
+\usepackage{algpascal}
+\algdef{SE}{For}{End}[2]{%
+  \textkeyword{for} \(#1\) \textkeyword{to} \(#2\) }{%
+  \textkeyword{end}}
+\algdef{SE}{While}{End}[1]{%
+  \textkeyword{while} \(#1\)}{%
+  \textkeyword{end}}
+\algdef{SE}{If}{EndIf}[1]{%
+  \textkeyword{if} \(#1\)}{%
+  \textkeyword{end}}
+
+\usepackage{color}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\title{Bayesian Optimization of a Wearable Assistive Device Using an Estimator Stopping Process}
+\author[]{Charles Liu\\ \texttt{cliu02@g.harvard.edu}}
+\institute{IACS, Harvard University}
+\date{May 4, 2018}
+
+\begin{document}
+
+\frame{\titlepage}
+
+
+\section{Introduction}
+\begin{frame}
+    \frametitle{\textbf{Soft Exosuit}}
+	\movie[loop, autostart, showcontrols, height = 0.6\textwidth, width = \textwidth]{}{IMG_4348.MOV}
+\end{frame}
+
+\begin{frame}
+    \frametitle{\textbf{Process Overview}}
+	\begin{figure}
+		\centering
+		\scalebox{.75}{\input{outlineflow}}
+	\end{figure}
+\end{frame}
+
+\section{Parameter Selection}
+\begin{frame}
+	\frametitle{\textbf{Standard Gaussian Process Model}}
+	Observations represent underlying process with some Gaussian noise
+	\begin{align*}
+		y &\sim f + \mathbb{N}(0, \sigma_n^2)\\
+		f &\sim \mathbb{G}(0, \kappa)\\
+		\kappa(x_i, x_j \vert \sigma_\theta^2, l) &= \sigma_\theta^2 \exp(-\frac{1}{2}d^2(\frac{x_i}{l}, \frac{x_j}{l}))
+	\end{align*}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Gaussian Process Regression}}
+	Given some training data, closed form posterior distribution at any point $x$
+	\begin{gather*}
+	  \bar{\mu}(x) = K(X, x)^T[K(X, X) + \sigma_n^2 I]^{-1}Y \\
+	  \bar{\sigma}^2(x) = \kappa(x, x\vert \theta) - K(X, x)^T[K(X,X) + \sigma_n^2 I]^{-1}K(X,x) \\
+	  K(X,x)_i = \kappa(x_i, x\vert \theta)\\
+	  K(X,X)_{ij} = \kappa(x_i, x_j\vert \theta),
+	\end{gather*}
+	where $X = \{x_i\}_{i=1}^n$ and $Y = \{y_i\}_{i=1}^n$. 
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{$\sigma_\theta^2$ Effect}}
+	\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{magn_regression}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Hyperparameter Estimation}}
+	\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{hyperparamprob}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Expected Improvement}}
+	\begin{align*}
+	  EI(x\vert \mathbb{S}) &= \int_\infty^\infty max(0, y^*-y)p(y\vert x)dy\\
+	    &= z\bar{\sigma}(x)\Phi(z) + \bar{\sigma}(x)\phi(z)\\
+	  z &= \frac{y^* - \bar{\mu}(x) + \xi}{\bar{\sigma}(x)},
+	\end{align*}
+	where $y^*$ is the best value observed so far, $\Phi(z)$ and $\phi(z)$ are the standard normal CDF and PDF functions, and $\xi$ is a scaling parameter to adjust the tradeoff between exploration-exploitation
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Bayesian Optimization}}
+	\begin{algorithmic}
+	\State \textkeyword{Objective Function} $F(x)$
+	\State \textkeyword{Acquisition Function} $g(\mu, \sigma^2)$
+	\State \textkeyword{Specify Exploration Points } $\mathbb{E} = \{e_1, e_2, ..., e_n\}$
+	\State \textkeyword{Training Samples } $\mathbb{S}$
+	\For{i=1}{n}
+	  \State $\mathbb{S} = \mathbb{S} \cup \{e_i, F(e_i)\}$
+	\End
+	\While{t < T}
+	  \State Update GP Hyperparameters $\theta$
+	  \State Given $f(x\vert \theta, \mathbb{S}) \sim \mathcal{N}(\mu_x, \sigma_x^2)$,
+	  \State $x^* = \argmax_{x \in \mathbb{X}} g(\mu_x, \sigma_x^2)$
+	  \State $\mathbb{S} = \mathbb{S} \cup \{x^*, F(x^*)\}$
+	\End
+	\end{algorithmic}
+\end{frame}
+
+\section{Metabolic Estimation}
+\begin{frame}
+	\frametitle{\textbf{Instantaneous Energetic Cost}}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Kalman Filter}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Unscented Transform}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{UKF Model}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Covariance Parameterization}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Subject Trials}}
+\end{frame}
+
+\section{Stopping Models}
+\begin{frame}
+	\frametitle{\textbf{$\sigma$-Offset Model}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Gittins Model}}
+\end{frame}
+
+\section{Results}
+\begin{frame}
+	\frametitle{\textbf{Hip-Only Trials}}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}
+	\frametitle{\textbf{Acknowledgements:}}
+\end{frame}
+
+
+\begin{comment}
+\begin{frame}
+\frametitle{\textbf{Include a graphic}}
+\begin{figure}[htb]
+\spacingset{1}
+\centerline{\includegraphics[scale=.40]{data/postprocessing/AvatarSelectionPlot-Role2.pdf}}
+\end{figure}
+\end{frame}
+\end{comment}
+
+
+%this way you can have a bibliography in your slides.
+%\begin{comment}
+%\begin{frame}[allowframebreaks]
+%\def\newblock{}
+%\bibliography{TingleyBib}
+%\end{frame}
+%\end{comment}
+
+
+
+\end{document}

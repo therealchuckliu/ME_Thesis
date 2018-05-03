@@ -6,9 +6,9 @@
 \begin{tikzpicture}[node distance=2cm]
 
 \node (measurement) [startstop] {Respiratory Measurement};
-\node (estimator) [process, below of=measurement] {Metabolic Estimation (Ch. \ref{ch:2})};
-\node (stopping) [decision, below of=estimator, yshift=-0.5cm] {Change Parameter Settings? (Ch. \ref{ch:3})};
-\node (bayesopt) [process, below of=stopping, yshift=-1cm] {Select New Parameter Settings (Ch. \ref{ch:1})};
+\node (estimator) [process, below of=measurement] {Metabolic Estimation (Ch.2)};
+\node (stopping) [decision, below of=estimator, yshift=-0.5cm] {Change Parameter Settings? (Ch.3)};
+\node (bayesopt) [process, below of=stopping, yshift=-1cm] {Select New Parameter Settings (Ch.1)};
 
 \draw [arrow] (measurement) -- (estimator);
 \draw [arrow] (estimator) -- (stopping);
