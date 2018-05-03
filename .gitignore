@@ -1,6 +1,9 @@
 ## Mac
 .DS_Store
 
+## Large video
+IMG_4348.MOV
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
