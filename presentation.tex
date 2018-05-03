@@ -282,7 +282,6 @@
 		\Phi(\frac{\mu}{\sigma}) > K,
 	\end{align*}
 	for risk tolerance $K$. Define model as
-
 	\begin{align*}
 	  X_t &= (\alpha_t + \alpha_0, \beta_t + \beta_0) \\
 	  P(X_{t+1}) &=
@@ -323,13 +322,31 @@
         \hline
         $e_{00}$&$e_{01}$&$e_{02}$&$e_{03}$&$e_{04}$&$e_{05}$&$e_{06}$&$e_{07}$&$e_{08}$&$e_{09}$\\\hline
         $e_{10}$&$e_{11}$&$e_{12}$&$e_{13}$&$e_{14}$&$e_{15}$&$e_{16}$&$e_{17}$&$e_{18}$&$e_{19}$\\\hline
-        $e_{20}$&$e_{21}$&$e_{22}$&$e_{23}$&$e_{24}$&$e_{25}$&$e_{26}$&$e_{27}$&$e_{28}$&$e_{29}$\\
+        $e_{20}$&$e_{21}$&$e_{22}$&$e_{23}$&$e_{24}$&$e_{25}$&$e_{26}$&$e_{27}$&$e_{28}$&$e_{29}$\\\hline
+        $e_{30}$&$e_{31}$&$e_{32}$&$e_{33}$&$e_{34}$&$e_{35}$&$e_{36}$&$e_{37}$&$e_{38}$&$e_{39}$\\
     \end{tabular}
     $\cdots$\\
     \vspace{0.5em}
     $\vdots$
 	\end{table}
-	Use most risk averse threshold in window: max $\sigma$-offset, min for Gittins
+	Use most risk averse threshold in window: max $\sigma$-offset, min Gittins
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Simulations}}
+	\begin{figure}
+		\includegraphics[width=\textwidth]{levy.png}
+	\end{figure}
+	\begin{table}
+	\centering
+	\begin{tabular}{ | c | c | c | c | }
+	  \hline
+	  Domain & Minimum & Mean & Std\\
+	  \hline
+	  $[-10, 10]^4$ & 0 & 42.544 & 27.939\\
+	  \hline
+	\end{tabular}
+	\end{table}
 \end{frame}
 
 \section{Results}
