@@ -31,7 +31,7 @@ First, a prediction is made for the state of the system after one timestep. Let 
 The prediction is then reconciled with the observed measurement through a minimum mean-squared estimate $\hat{x}(t)$ and covariance $P_{x}(t)$ according to the following equations
 \begin{align}
 \begin{split}
-  \hat{x}(t) &= \hat{x}(t\vert t-1) + K \mathbb{E}[y] \\
+  \hat{x}(t) &= \hat{x}(t\vert t-1) + Ky \\
   P_{x}(t) &= P_{x}(t\vert t-1) - KP_{y}(t\vert t-1) K^T\\
   K &= P_{xy}(t\vert t-1) P_{y}^{-1}(t\vert t-1)\\
   y &= z(t) - H(\hat{x}(t\vert t-1) , w(t), t).
@@ -43,9 +43,9 @@ The underlying requirement for these equations is an accurate propagation of the
 As we consider $\tau_0, \tau, c, c_0$ to be constant parameters, our UKF setup is
 \begin{align}
 \begin{split}
-  x = &[c_0 \text{ } c \text{ } \tau_0 \text{ } \tau]\\
-  F(x&(t), v(t), t) = x(t) + v(t)\\
-  H(x(t)&, w(t), t) = m_t(x(t)) + w(t).
+  x &= [c_0 \text{ } c \text{ } \tau_0 \text{ } \tau]\\
+  F(x(t), v(t), t) &= x(t) + v(t)\\
+  H(x(t), w(t), t) &= m_t(x(t)) + w(t).
 \end{split}
 \end{align}
 

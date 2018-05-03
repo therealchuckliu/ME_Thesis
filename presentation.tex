@@ -31,6 +31,7 @@
 %\usepackage{spacingset}
 \newcommand\spacingset[1]{\renewcommand{\baselinestretch}%
 {#1}\small\normalsize}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
 
 \usepackage[plain]{algorithm}
 \usepackage{algpascal}
@@ -44,7 +45,7 @@
   \textkeyword{if} \(#1\)}{%
   \textkeyword{end}}
 
-\usepackage{color}
+\usepackage{color,colortbl}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 
@@ -78,7 +79,7 @@
 	\frametitle{\textbf{Standard Gaussian Process Model}}
 	Observations represent underlying process with some Gaussian noise
 	\begin{align*}
-		y &\sim f + \mathbb{N}(0, \sigma_n^2)\\
+		y &\sim f + \mathcal{N}(0, \sigma_n^2)\\
 		f &\sim \mathbb{G}(0, \kappa)\\
 		\kappa(x_i, x_j \vert \sigma_\theta^2, l) &= \sigma_\theta^2 \exp(-\frac{1}{2}d^2(\frac{x_i}{l}, \frac{x_j}{l}))
 	\end{align*}
@@ -108,7 +109,7 @@
 	\frametitle{\textbf{Hyperparameter Estimation}}
 	\begin{figure}
 	\centering
-	\includegraphics[width=\textwidth]{hyperparamprob}
+	\includegraphics[width=\textwidth]{hyperparamprob.png}
 	\end{figure}
 \end{frame}
 
@@ -144,36 +145,191 @@
 \section{Metabolic Estimation}
 \begin{frame}
 	\frametitle{\textbf{Instantaneous Energetic Cost}}
-	
+	\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{metabolicestimation.png}
+	\end{figure}
 \end{frame}
 
 \begin{frame}
 	\frametitle{\textbf{Kalman Filter}}
+	System Dynamics
+	\begin{align*}
+	  x(t+1) &= F(x(t), v(t), t)\\
+	  z(t) &= H(x(t), w(t), t)\\
+	\end{align*}
+
+	Update Equations
+	\begin{align*}
+	  \hat{x}(t) &= \hat{x}(t\vert t-1) + Ky \\
+	  P_{x}(t) &= P_{x}(t\vert t-1) - KP_{y}(t\vert t-1) K^T\\
+	  K &= P_{xy}(t\vert t-1) P_{y}^{-1}(t\vert t-1)\\
+	  y &= z(t) - H(\hat{x}(t\vert t-1) , w(t), t)
+	\end{align*}
 \end{frame}
 
 \begin{frame}
 	\frametitle{\textbf{Unscented Transform}}
+	\vspace{-2em}
+	\begin{align*}
+	  \chi_0 &= \bar{x}\\
+	  \chi_i &= \bar{x} + (\sqrt{(N + \lambda)P_x})_i & i = 1, ..., N \\
+	  \chi_i &= \bar{x} - (\sqrt{(N + \lambda)P_x})_{i-N} & i = N + 1, ..., 2N\\
+	  W_0^{(m)} &= \lambda /(N + \lambda) \\
+	  W_0^{(c)} &= \lambda /(N + \lambda) + (1- \alpha^2 + \beta)\\
+	  W_i^m &= W_i^c = 1/\{(2(N + \lambda))\} & i = 1, ..., 2N,
+	\end{align*}
+	where $\lambda = \alpha^2(N + \kappa) - N$, and $\alpha$, $\kappa$, and $\beta$ are scaling parameters. Given $y=g(x)$,
+	\begin{align*}
+	  \bar{y} &\approx \sum_{i=0}^{2N} W_i^{(m)}g(\chi_i)\\
+	  P_y &\approx \sum_{i=0}^{2N} W_i^{(c)}(g(\chi_i) - \bar{y})(g(\chi_i) - \bar{y})^T
+	\end{align*}
 \end{frame}
 
 \begin{frame}
 	\frametitle{\textbf{UKF Model}}
+	Time constants $\tau_0, \tau$ characterizing rate of change of cost constants $c_0, c$
+	\begin{align*}
+		x &= [c_0 \text{ } c \text{ } \tau_0 \text{ } \tau]\\
+	    F(x(t), v(t), t) &= x(t) + v(t)\\
+	    H(x(t), w(t), t) &= c(1-e^{\frac{-t}{\tau}}) + c_0e^{\frac{-t}{\tau_0}} + w(t)
+	\end{align*}
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{Covariance Parameterization}}
+	\frametitle{\textbf{Measurement Noise}}
+	\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{measurementnoise.png}
+	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{Subject Trials}}
+	\frametitle{\textbf{Estimator in Subject Trials}}
+	\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth]{subjcostest.png}
+	\end{figure}
 \end{frame}
 
 \section{Stopping Models}
 \begin{frame}
-	\frametitle{\textbf{$\sigma$-Offset Model}}
+	\frametitle{\textbf{Stopping Problem Formulation}}
+	\begin{table}
+		\centering
+		\begin{tabular}{ |c  c| }
+		  \hline&\\
+		  $N$ & Finite horizon\\
+		  &\\
+		  $X_t$ & State at time $t$\\
+		  &\\
+		  $P(X_t \vert X_{t-1})$ & State transitions, typically Markovian\\
+		  &\\
+		  $\lambda$ & Discount Factor $\in (0, 1]$\\
+		  &\\
+		  $r(X)$ & Bounded reward function for continuing at state $X$\\
+		  &\\
+		  $g(X)$ & Bounded reward function for stopping at state $X$\\
+		  &\\
+		  \hline
+		\end{tabular}
+		\end{table}
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{Gittins Model}}
+	\frametitle{\textbf{Optimal Stopping Point}}
+	Via backward induction
+	\begin{align*}
+	  J_N(x) &= g(x)\\
+	  J_n(x) &= max\{g(x), r(x) + \lambda\mathbb{E}_{P(y\vert x)}[J_{n+1}(y)]\}
+	\end{align*}
+	Optimal stopping point
+	\begin{align*}
+	  \tau = \min_{t}J_t(X_t) = g(X_t)
+	\end{align*}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Distribution of Interest}}
+	Given
+	\begin{align*}
+		\text{Current Estimate: } \hat{x}_t &\sim \mathcal{N}(\mu_{x_t}, \sigma^2_{x_t})\\
+		\text{Best Estimate: } \hat{x}^* &\sim \mathcal{N}(\mu_{x^*}, \sigma^2_{x^*})
+	\end{align*}
+	We are concerned with
+	\begin{align*}
+	    \hat{x}_t - \hat{x}^* &\sim \mathcal{N}(\mu, \sigma^2)\\
+	    \mu &= \mu_{x_t} - \mu_{x^*}\\
+	    \sigma^2 &= \sigma^2_{x_t} + \sigma^2_{x^*}
+	\end{align*}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{$\sigma$-Offset Model}}
+	\begin{align*}
+	  X_t &= \mu\\
+	  P(X_t \vert X_{t-1}) &= P(X_t) \sim \mathcal{N}(\mu, \sigma^2)\\
+	  r(x) &= K\sigma-x\\
+	  g(x) &= 0
+	\end{align*}
+	Stopping condition $X_t > K\sigma$
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Success/Failure Model}}
+	Define success as
+	\begin{align*}
+		\Phi(\frac{\mu}{\sigma}) > K,
+	\end{align*}
+	for risk tolerance $K$. Define model as
+
+	\begin{align*}
+	  X_t &= (\alpha_t + \alpha_0, \beta_t + \beta_0) \\
+	  P(X_{t+1}) &=
+	  \begin{cases}
+	      (\alpha_t + \alpha_0 + 1, \beta_t + \beta_0)
+	      \\ \tab\text{w.p. } \frac{\alpha_t + \alpha_0}{\alpha_t + \alpha_0 + \beta_t + \beta_0}\\
+	      (\alpha_t + \alpha_0, \beta_t + \beta_0 + 1)
+	      \\ \tab\text{w.p. } \frac{\beta_t + \beta_0}{\alpha_t + \alpha_0 + \beta_t + \beta_0}
+	  \end{cases}\\
+	  r(X_t) &= \frac{\alpha_t + \alpha_0}{\alpha_t + \alpha_0 + \beta_t + \beta_0},
+	\end{align*}
+	with smoothing priors $\alpha_0,\beta_0$ and success/failures $\alpha_t,\beta_t$
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Multi-Armed Bandit Problem}}
+	Which is the better option?
+	\begin{itemize}
+		\item Option 1: 20 successes, 20 failures
+		\item Option 2: 3 successes, 4 failures
+	\end{itemize}
+	Define Gittins Index as
+	\begin{gather*}
+	  \nu(x) = (1-\lambda)\min_{K} \{J_0(x) = g(x) = K\}\\
+	  \nu((30, 30)) = 0.5133\\
+	  \nu((4, 6)) = 0.5289
+	\end{gather*}
+
+	In the case of single option, must set another threshold $\nu(x) < V$
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Adaptive Threshold}}
+	Use the exploration phase of Bayesian optimization to tune thresholds in either model, with final distribution for each point as "best" value. Consider a window of values at time $t$
+	\begin{table}
+    \centering
+    \begin{tabular}{|c|c|>{\columncolor[gray]{0.8}}c|>{\columncolor[gray]{0.8}}c|>{\columncolor[gray]{0.8}}c|c|c|c|c|c}
+        \hline
+        $e_{00}$&$e_{01}$&$e_{02}$&$e_{03}$&$e_{04}$&$e_{05}$&$e_{06}$&$e_{07}$&$e_{08}$&$e_{09}$\\\hline
+        $e_{10}$&$e_{11}$&$e_{12}$&$e_{13}$&$e_{14}$&$e_{15}$&$e_{16}$&$e_{17}$&$e_{18}$&$e_{19}$\\\hline
+        $e_{20}$&$e_{21}$&$e_{22}$&$e_{23}$&$e_{24}$&$e_{25}$&$e_{26}$&$e_{27}$&$e_{28}$&$e_{29}$\\
+    \end{tabular}
+    $\cdots$\\
+    \vspace{0.5em}
+    $\vdots$
+	\end{table}
+	Use most risk averse threshold in window: max $\sigma$-offset, min for Gittins
 \end{frame}
 
 \section{Results}
@@ -181,9 +337,17 @@
 	\frametitle{\textbf{Hip-Only Trials}}
 \end{frame}
 
+\begin{frame}
+	\frametitle{\textbf{Multi-Joint Trials}}
+\end{frame}
+
 \section{Conclusion}
 \begin{frame}
-	\frametitle{\textbf{Acknowledgements:}}
+	\frametitle{\textbf{Future Work}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Acknowledgements}}
 \end{frame}
 
 
