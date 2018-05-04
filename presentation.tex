@@ -19,6 +19,10 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
 \usepackage{multimedia}
+\usepackage{empheq}
+\usepackage{subcaption}
+\usepackage[most]{tcolorbox}
+
 %% === bibliography packages ===
 %\usepackage{natbib}
 %\bibliographystyle{natbib}
@@ -303,12 +307,14 @@
 		\item Option 1: 20 successes, 20 failures
 		\item Option 2: 3 successes, 4 failures
 	\end{itemize}
-	Define Gittins Index as
+	Assume $g(x) = g$ is a constant, define Gittins Index as
 	\begin{gather*}
-	  \nu(x) = (1-\lambda)\min_{K} \{J_0(x) = g(x) = K\}\\
-	  \nu((30, 30)) = 0.5133\\
-	  \nu((4, 6)) = 0.5289
+	  \nu(X_t) = (1-\lambda)\min_{g} \{J_t(X_t) = g\}\\
+	  \nu((30, 30)) = 0.5133
 	\end{gather*}
+	\begin{empheq}[box=\tcbhighmath]{equation*}
+		\nu((4, 6)) = 0.5289
+	\end{empheq}
 
 	In the case of single option, must set another threshold $\nu(x) < V$
 \end{frame}
@@ -339,34 +345,149 @@
 	\end{figure}
 	\begin{table}
 	\centering
+	\vspace{-1em}
+	\scalebox{0.7}{%
 	\begin{tabular}{ | c | c | c | c | }
 	  \hline
 	  Domain & Minimum & Mean & Std\\
 	  \hline
 	  $[-10, 10]^4$ & 0 & 42.544 & 27.939\\
 	  \hline
+	\end{tabular}}
+	\end{table}
+\end{frame}
+
+\section{Subject Tests}
+\begin{frame}
+	\frametitle{\textbf{Hip-Only Protocol}}
+	\begin{table}
+	\centering
+	\begin{tabular}{ |c|c|c|c|c|c| } 
+	 \hline
+	 Onset & Peak & Offset & Force & Curv1 & Curv2\\ 
+	 \hline
+	 0-25 & 15-40 & 30-55 & 100-300 & 20-70 & 20-70\\
+	 \hline
+	\end{tabular}
+	\end{table}
+	\begin{center}
+	Gittins Method $V = 0.35$\\
+	8 Exploration Points\\
+	5 Minute Break\\
+	40 Minute Optimization\\
+	5 Minute Break\\
+	5 Minute Slack/FIX/OPT Conditions
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{Hip-Only Protocol}}
+	\begin{table}
+	\centering
+	\begin{tabular}{ |c|c|c|c|c|c|c| } 
+	 \hline
+	 Subj & OPT & FIX & OPT Peak F & FIX Peak F\\ 
+	 \hline
+	 1 & 35\% & 29\% & 223N & 247N\\
+	 2 & 7\% & -4\% & 174N & 230N \\
+	 \hline
 	\end{tabular}
 	\end{table}
 \end{frame}
 
-\section{Results}
 \begin{frame}
-	\frametitle{\textbf{Hip-Only Trials}}
+	\frametitle{\textbf{Multi-Joint Protocol}}
+	\begin{table}
+	\centering
+	\begin{tabular}{ |c|c|c|c| } 
+	 \hline
+	 Hip Peak & Hip Offset & Ankle Onset & Ankle Peak\\ 
+	 \hline
+	 5-30 & 20-45 & 30-50 & 35-55\\
+	 \hline
+	\end{tabular}\\
+		Fixed Hip Force = 30\% BW, Ankle Force = 60\% BW
+	\end{table}
+	\begin{center}
+		Gittins Method $V=AD$\\
+		6 Exploration Points\\
+		5 Minute Break\\
+		30 Minute Optimization\\
+		5 Minute Break\\
+		5 Minute Slack/OPT Conditions
+	\end{center}
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{Multi-Joint Trials}}
+	\frametitle{\textbf{Multi-Joint Protocol}}
+	\begin{table}
+	\centering
+	\begin{tabular}{ |c|c|c|c|c|c| } 
+	 \hline
+	 Subj & HP & HO & AO & AP &  $\%\downarrow$\\ 
+	 \hline
+	 1 & 11 & 33 & 42 & 53 & 22.0\\
+	 2 & 16 & 37 & 40 & 52 & 40.7\\
+	 3 & 12 & 33 & 44.5 & 55 & 17\\
+	 \hline
+	\end{tabular}
+	\end{table}
 \end{frame}
 
 \section{Conclusion}
 \begin{frame}
+	\frametitle{\textbf{Contribution}}
+	\begin{itemize}
+		\item Two stopping models based on a metabolic estimator
+		\item Demonstrated comparable results to previous study
+		\item Initial results with multi-joint optimization
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
 	\frametitle{\textbf{Future Work}}
+	\begin{itemize}
+		\item Continue to tune Gaussian process in exploration/exploitation tradeoff
+		\item Optimize metabolic estimator covariance parameters
+		\item Conduct more subject trials, including using $\sigma$-offset method
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{\textbf{Acknowledgements}}
-\end{frame}
+	\begin{figure}
+	\captionsetup[subfigure]{labelformat=empty}
+	\begin{subfigure}{.5\textwidth}
+	\centering
+	\includegraphics[height=2.5cm]{scott-seas_0}
+	\caption{Scott Kuindersma}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+	\centering
+	\includegraphics[height=2.5cm]{walsh_200x300}
+	\caption{Conor Walsh}
+	\end{subfigure}%
+	\end{figure}
 
+	\begin{figure}
+	\captionsetup[subfigure]{labelformat=empty}
+	\begin{subfigure}{.3\textwidth}
+	\centering
+	\includegraphics[height=2.5cm]{kim_myunghee}
+	\caption{Myunghee Kim}
+	\end{subfigure}%
+	\begin{subfigure}{.3\textwidth}
+	\centering
+	\includegraphics[height=2.5cm]{kim_jinsoo}
+	\caption{Jinsoo Kim}
+	\end{subfigure}%
+	\begin{subfigure}{.3\textwidth}
+	\centering
+	\includegraphics[height=2.5cm]{sangjun}
+	\caption{Sangjun Lee}
+	\end{subfigure}%
+	\end{figure}
+\end{frame}
 
 \begin{comment}
 \begin{frame}

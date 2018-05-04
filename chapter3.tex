@@ -93,7 +93,7 @@ where $\alpha_0,\beta_0$ are smoothing priors and $\alpha_t,\beta_t$ are success
 
 Gittins and Jones showed that an optimal policy could be constructed by calculating a value called the Gittins Index \citep{doi:10.1002/9781118596333.ch24}. Let $g(x) = K$ for some constant $K$, then the Gittins Index is defined as
 \begin{align}
-  \nu(x) = (1-\lambda)\min_{K} \{J_0(x) = K\}.
+  \nu(X_t) = (1-\lambda)\min_{K} \{J_t(X_t) = K\}.
 \end{align}
 The Gittins Index is generally used for infinite horizon stopping problems, with $g(x)=\frac{\nu(x)}{1-\lambda}$ representing an infinite geometric sum to compensate for all future rewards. By setting $\lambda=1-\frac{1}{N}$, $\forall x \; 0 \leq \nu(x) \leq 1$.
 
