@@ -95,7 +95,7 @@ Gittins and Jones showed that an optimal policy could be constructed by calculat
 \begin{align}
   \nu(X_t) = (1-\lambda)\min_{K} \{J_t(X_t) = K\}.
 \end{align}
-The Gittins Index is generally used for infinite horizon stopping problems, with $g(x)=\frac{\nu(x)}{1-\lambda}$ representing an infinite geometric sum to compensate for all future rewards. By setting $\lambda=1-\frac{1}{N}$, $\forall x \; 0 \leq \nu(x) \leq 1$.
+The Gittins Index is generally used for infinite horizon stopping problems, with $g(x)=\frac{\nu(x)}{1-\lambda}$ representing an infinite geometric sum to compensate for all future rewards. As a success in a later measurement is worth as much as in an earlier measurement, if not more, $\lambda$ is kept quite high.
 
 In the case of a multi-armed bandit problem, the optimal policy is to play the arm with the highest Gittins Index. \citet{FergusonStopping2006} shows that the stopping problem, or the one-armed bandit problem, is equivalent to having a second arm that provides a constant reward. The optimal policy then corresponds to playing the arm as long as its Gittins Index is above a specified threshold $V$. As $T$ and $V$ are correlated, one of the parameters can be fixed (such as $T=0.5$) while the other is tuned to a preferred risk tolerance for expected success rate. 
 
