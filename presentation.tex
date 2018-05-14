@@ -120,7 +120,7 @@
 \begin{frame}
 	\frametitle{\textbf{Expected Improvement}}
 	\begin{align*}
-	  EI(x\vert \mathbb{S}) &= \int_\infty^\infty max(0, y^*-y)p(y\vert x)dy\\
+	  EI(x\vert \mathbb{S}) &= \int_{-\infty}^\infty max(0, y^*-y)p(y\vert x)dy\\
 	    &= z\bar{\sigma}(x)\Phi(z) + \bar{\sigma}(x)\phi(z)\\
 	  z &= \frac{y^* - \bar{\mu}(x) + \xi}{\bar{\sigma}(x)},
 	\end{align*}

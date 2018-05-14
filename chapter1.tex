@@ -38,7 +38,7 @@ where $X = \{x_i\}_{i=1}^n$ and $Y = \{y_i\}_{i=1}^n$.
 Given a Gaussian distribution at point $x$, an acquisition function captures how attractive that point is to sample next. A common choice of acquisition function is Expected Improvement (EI), which returns the expected reduction in cost over the best parameters observed so far. For the given GP model, EI can be computed in closed form: 
 \begin{align}
   \begin{split}
-  EI(x\vert \mathbb{S}) &= \int_\infty^\infty max(0, y^*-y)p(y\vert x)dy\\
+  EI(x\vert \mathbb{S}) &= \int_{-\infty}^\infty max(0, y^*-y)p(y\vert x)dy\\
     &= z\bar{\sigma}(x)\Phi(z) + \bar{\sigma}(x)\phi(z)
   \end{split}\\
   z &= \frac{y^* - \bar{\mu}(x) + \xi}{\bar{\sigma}(x)}\nonumber,
